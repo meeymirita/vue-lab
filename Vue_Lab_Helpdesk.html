@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vue Lab — Helpdesk: Vue 3 с нуля (Router, Pinia, WebSocket, тесты)</title>
+<style>
+  :root { --red: #2f8f6b; --red-dark: #35495e; --red-light: #e8f5ef; --red-mid: #bfe3d3; --ink: #1c1c1c; }
+  body { font-family: 'DejaVu Sans', 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.6; color: var(--ink); }
+  h1 { font-size: 28px; color: var(--red); margin-bottom: 4px; }
+  .subtitle { font-size: 15px; color: #555; margin-top: 0; margin-bottom: 18px; }
+  h2 { font-size: 21px; color: var(--red-dark); border-bottom: 3px solid var(--red-mid); padding-bottom: 4px; margin-top: 44px; }
+  h3 { font-size: 16px; color: #333; margin-top: 24px; margin-bottom: 6px; }
+  h4 { font-size: 14px; color: #555; margin-top: 16px; margin-bottom: 4px; }
+  p { margin: 7px 0; }
+  code { background: #f1f5f3; padding: 1px 5px; border-radius: 3px; font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace; font-size: 12.5px; }
+  pre { background: #f6faf8; border: 1px solid #cfe4d9; border-left: 4px solid var(--red); border-radius: 4px; padding: 10px 12px; font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0 16px 0; font-size: 12.5px; }
+  th, td { border: 1px solid #ddd; padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--red-light); color: var(--red-dark); }
+  tr:nth-child(even) td { background: #fafafa; }
+  ul, ol { margin: 4px 0 10px 0; padding-left: 22px; }
+  li { margin: 3px 0; }
+  .tag { display: inline-block; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 8px; border-radius: 3px; margin-bottom: 5px; }
+  .insight-box { background: var(--red-light); border: 1px solid var(--red-mid); border-left: 5px solid var(--red); border-radius: 4px; padding: 8px 14px; margin: 12px 0; }
+  .insight-box .tag { background: var(--red); }
+  .fix-box { background: #f1faf3; border: 1px solid #bfe4c7; border-left: 5px solid #2f9e4a; border-radius: 4px; padding: 8px 14px; margin: 6px 0 14px 0; }
+  .fix-box .tag { background: #2f9e4a; }
+  .note-box { background: #f4f4f6; border: 1px solid #d9d9e0; border-left: 5px solid #555a6e; border-radius: 4px; padding: 8px 14px; margin: 12px 0; }
+  .note-box .tag { background: #555a6e; }
+  .next-box { background: #fff8e6; border: 1px solid #f0dca0; border-left: 5px solid #e0a800; border-radius: 4px; padding: 8px 14px; margin: 14px 0 6px 0; font-size: 13px; }
+  .next-box .tag { background: #e0a800; color: #3a2a00; }
+  .next-box ul { margin: 4px 0 2px 0; }
+  details.deep { border: 1px dashed var(--red-mid); border-radius: 4px; margin: 12px 0; background: #fff; }
+  details.deep summary { cursor: pointer; padding: 8px 14px; font-weight: bold; color: var(--red-dark); background: #eaf3ee; border-radius: 4px; list-style: none; }
+  details.deep summary::before { content: '▸ '; }
+  details.deep[open] summary::before { content: '▾ '; }
+  details.deep .deep-body { padding: 6px 16px 10px 16px; }
+  .toc { background: #f2f8f5; border: 1px solid #cfe4d9; border-radius: 6px; padding: 14px 20px; margin: 16px 0 24px 0; }
+  .toc ol { padding-left: 18px; }
+  .small { font-size: 12px; color: #777; }
+  .fnref { color: var(--red); font-weight: bold; font-size: 0.75em; }
+  .glossary-item { margin: 0 0 10px 0; padding-left: 24px; text-indent: -24px; }
+  .glossary-item b { color: var(--red-dark); }
+  .step { margin: 22px 0 10px 0; }
+  .step-head { display: block; background: var(--red-dark); color: #fff; padding: 6px 12px; border-radius: 4px 4px 0 0; font-weight: bold; font-size: 14px; }
+  .step-head .num { display: inline-block; background: #fff; color: var(--red-dark); padding: 0 8px; border-radius: 3px; margin-right: 8px; font-size: 12.5px; }
+  .step-body { border: 1px solid var(--red-mid); border-top: none; border-radius: 0 0 4px 4px; padding: 10px 14px; }
+  .step-body pre { margin: 8px 0; }
+  .why { background: #fff8e6; border-left: 4px solid #e0a800; padding: 6px 12px; margin: 10px 0 4px 0; font-size: 13px; }
+  .why b { color: #8a6500; }
+  .file { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 12px; color: var(--red-dark); background: #fdecea; padding: 1px 6px; border-radius: 3px; }
+  .session-banner { background: linear-gradient(90deg, var(--red-dark), var(--red)); color: #fff; padding: 10px 16px; border-radius: 6px; margin: 28px 0 12px 0; font-size: 17px; font-weight: bold; }
+  .session-banner span { font-weight: normal; font-size: 12px; opacity: 0.9; margin-left: 10px; }
+  .page-break { display: none; }
+  .life { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 12px; }
+
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #fff; }
+  .layout { display: flex; align-items: flex-start; }
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; width: 300px; flex: 0 0 300px; background: var(--red-dark); color: #fff; padding: 52px 12px 16px 12px; box-sizing: border-box; font-size: 12.5px; transition: margin-left .2s; }
+  body.nav-collapsed .sidebar { margin-left: -300px; }
+  .sidebar .nav-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+  .sidebar ul { list-style: none; padding-left: 0; margin: 0; }
+  .sidebar li { margin: 1px 0; }
+  .sidebar a { color: #fff; text-decoration: none; display: block; padding: 4px 8px; border-radius: 4px; }
+  .sidebar a:hover { background: #fff; color: var(--red-dark); }
+  .sidebar .nav-steps { padding-left: 8px; border-left: 2px solid rgba(255,255,255,.4); margin: 4px 0 6px 8px; }
+  .sidebar .nav-steps a { font-size: 11.5px; color: #d3e1dc; }
+  .sidebar .nav-steps a:hover { color: var(--red-dark); }
+  .sidebar .nav-session a { color: #fff; font-weight: bold; margin-top: 6px; background: rgba(255,255,255,.12); }
+  .sidebar a .mark { display: inline-block; width: 14px; color: #fff; font-weight: bold; }
+  .sidebar a.done { opacity: .75; }
+  .sidebar a.done .mark::before { content: '✓'; }
+  .sidebar .progress { margin: 6px 0 12px 0; }
+  .sidebar .bar { height: 8px; background: rgba(255,255,255,.25); border-radius: 4px; overflow: hidden; }
+  .sidebar .fill { height: 100%; width: 0; background: #fff; transition: width .3s; }
+  .sidebar .ptext { font-size: 11px; margin-top: 4px; color: #d3e1dc; }
+  .sidebar .reset { margin-top: 16px; background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  .sidebar .reset:hover { background: #fff; color: var(--red-dark); }
+  #nav-toggle { position: fixed; top: 10px; left: 10px; z-index: 20; background: var(--red); color: #fff; border: none; border-radius: 6px; width: 38px; height: 34px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  #nav-toggle:hover { background: var(--red-dark); }
+  main { flex: 1; max-width: 960px; padding: 24px 44px 90px 44px; box-sizing: border-box; min-width: 0; }
+  body.nav-collapsed main { padding-left: 64px; }
+  h2, .step, .glossary-item, .session-banner { scroll-margin-top: 16px; }
+  a { color: var(--red); }
+  a.anchor { color: #a9c8bb; text-decoration: none; margin-left: 6px; font-weight: normal; font-size: 0.8em; opacity: 0; }
+  h2:hover a.anchor, .step-head:hover a.anchor { opacity: 1; }
+  .step-head a.anchor { color: #fff; float: right; }
+  a.fnref { text-decoration: none; vertical-align: super; padding: 0 2px; }
+  a.fnref:hover { background: var(--red-light); border-radius: 3px; }
+  a.back { text-decoration: none; font-size: 0.9em; color: #6fae95; margin-left: 4px; }
+  .glossary-item:target, .step:target { outline: 2px solid var(--red); outline-offset: 4px; border-radius: 4px; }
+  h2:target { background: var(--red-light); }
+  .done-label { display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .done-label input { width: 18px; height: 18px; accent-color: var(--red); cursor: pointer; vertical-align: middle; }
+  .step-head .done-label input { accent-color: #fff; }
+  h2.is-done { color: #999; border-bottom-color: #ddd; }
+  .step.is-done .step-head { background: #9e9e9e; }
+  .step.is-done .step-body { border-color: #ddd; }
+  .totop { position: fixed; right: 24px; bottom: 24px; background: var(--red); color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  @media (max-width: 900px) { .sidebar { position: fixed; z-index: 10; } main { padding: 56px 16px 60px 16px; } body.nav-collapsed main { padding-left: 16px; } }
+  @media print { .sidebar, .totop, #nav-toggle, a.anchor, a.back, .done-label { display: none; } .layout { display: block; } main { max-width: none; padding: 0; } a { color: inherit; text-decoration: none; } details.deep { border: none; } details.deep summary { display: none; } details.deep .deep-body { display: block; } }
+</style>
+</head>
+<body id="top">
+<button id="nav-toggle">✕</button>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-title">🟢 Vue Lab — Helpdesk</div>
+<div class="progress"><div class="bar"><div class="fill" id="progress-fill"></div></div><div class="ptext" id="progress-text">0 / 0</div></div>
+<ul>
+<li><a href="#sec-1" data-key="sec-1"><span class="mark"></span>1. Зачем фреймворк</a>
+</li>
+<li><a href="#sec-2" data-key="sec-2"><span class="mark"></span>2. Азбука Vue</a>
+</li>
+<li><a href="#sec-3" data-key="sec-3"><span class="mark"></span>3. Реактивность под капотом</a>
+</li>
+<li><a href="#sec-4" data-key="sec-4"><span class="mark"></span>4. Компонентная архитектура</a>
+</li>
+<li><a href="#sec-5" data-key="sec-5"><span class="mark"></span>5. Vue Router</a>
+</li>
+<li><a href="#sec-6" data-key="sec-6"><span class="mark"></span>6. Pinia</a>
+</li>
+<li><a href="#sec-7" data-key="sec-7"><span class="mark"></span>7. Данные и асинхронность</a>
+</li>
+<li><a href="#sec-8" data-key="sec-8"><span class="mark"></span>8. Архитектура проекта</a>
+</li>
+<li><a href="#sec-9" data-key="sec-9"><span class="mark"></span>9. Задания (5 сессий)</a>
+<ul class="nav-steps">
+<li class="nav-session"><a href="#session-1">Сессия 1</a></li>
+<li><a href="#step-1-1" data-key="step-1-1"><span class="mark"></span>1.1 Стенд</a></li>
+<li><a href="#step-1-2" data-key="step-1-2"><span class="mark"></span>1.2 Бэкенд NestJS (дано)</a></li>
+<li><a href="#step-1-3" data-key="step-1-3"><span class="mark"></span>1.3 Песочница реактивности</a></li>
+<li><a href="#step-1-4" data-key="step-1-4"><span class="mark"></span>1.4 Списки, фильтры, ключи</a></li>
+<li><a href="#step-1-5" data-key="step-1-5"><span class="mark"></span>1.5 API-слой + useAsync</a></li>
+<li class="nav-session"><a href="#session-2">Сессия 2</a></li>
+<li><a href="#step-2-1" data-key="step-2-1"><span class="mark"></span>2.1 TicketCard / TicketList: props + emits</a></li>
+<li><a href="#step-2-2" data-key="step-2-2"><span class="mark"></span>2.2 defineModel + FilterBar + useDebounce</a></li>
+<li><a href="#step-2-3" data-key="step-2-3"><span class="mark"></span>2.3 BaseModal + Teleport + provide/inject</a></li>
+<li><a href="#step-2-4" data-key="step-2-4"><span class="mark"></span>2.4 Lifecycle в composable: useNow</a></li>
+<li class="nav-session"><a href="#session-3">Сессия 3</a></li>
+<li><a href="#step-3-1" data-key="step-3-1"><span class="mark"></span>3.1 ticketsStore</a></li>
+<li><a href="#step-3-2" data-key="step-3-2"><span class="mark"></span>3.2 authStore + persist + LoginForm</a></li>
+<li><a href="#step-3-3" data-key="step-3-3"><span class="mark"></span>3.3 Оптимистичное обновление</a></li>
+<li><a href="#step-3-4" data-key="step-3-4"><span class="mark"></span>3.4 uiStore + сравнение механизмов</a></li>
+<li class="nav-session"><a href="#session-4">Сессия 4</a></li>
+<li><a href="#step-4-1" data-key="step-4-1"><span class="mark"></span>4.1 Маршруты + lazy + 404</a></li>
+<li><a href="#step-4-2" data-key="step-4-2"><span class="mark"></span>4.2 Guards: auth и роли</a></li>
+<li><a href="#step-4-3" data-key="step-4-3"><span class="mark"></span>4.3 Вложенные маршруты + формы</a></li>
+<li><a href="#step-4-4" data-key="step-4-4"><span class="mark"></span>4.4 Фильтры в URL</a></li>
+<li class="nav-session"><a href="#session-5">Сессия 5</a></li>
+<li><a href="#step-5-1" data-key="step-5-1"><span class="mark"></span>5.1 WebSocket + живые обновления</a></li>
+<li><a href="#step-5-2" data-key="step-5-2"><span class="mark"></span>5.2 Канбан + Transition + component :is</a></li>
+<li><a href="#step-5-3" data-key="step-5-3"><span class="mark"></span>5.3 Тесты: 4 слоя</a></li>
+<li><a href="#step-5-4" data-key="step-5-4"><span class="mark"></span>5.4 Сборка + финал</a></li>
+</ul>
+</li>
+<li><a href="#sec-10" data-key="sec-10"><span class="mark"></span>10. Чек-лист концепций</a>
+</li>
+<li><a href="#sec-11" data-key="sec-11"><span class="mark"></span>11. Глоссарий</a>
+</li>
+<li><a href="#sec-12" data-key="sec-12"><span class="mark"></span>12. Вопросы на понимание</a>
+</li>
+<li><a href="#sec-13" data-key="sec-13"><span class="mark"></span>13. Что дальше</a>
+</li>
+</ul><button class="reset" id="reset-progress" title="Сбросить все галочки">Сбросить прогресс</button></nav>
+<main>
+
+<h1>🟢 Vue Lab — Helpdesk</h1>
+<p class="subtitle">Vue 3 с нуля на приложении службы поддержки: тикеты, канбан, комментарии, живые обновления. Реактивность → компоненты → Vue Router → Pinia → WebSocket и тесты. Стек: Vue 3.5 + Vite + Vue Router 4 + Pinia + Vitest, бэкенд — NestJS.</p>
+
+<div class="toc"><b>Как устроена лаба.</b> Разделы 1–8 — теория: от «зачем фреймворк» до реактивности под капотом, компонентной архитектуры, роутера и стора — каждое понятие на примере helpdesk. Раздел 9 — пять сессий заданий: стенд и азбука реактивности, компоненты, Router, Pinia, продвинутое (WebSocket, transitions, тесты). У каждого шага: код → «зачем» → команда → ожидаемый результат → «проверь себя». Разделы 10–13 — чек-лист, глоссарий, вопросы, что дальше. Галочки прогресса сохраняются в браузере.
+<p class="small">Отдельный репозиторий. Фронтенд — JavaScript (не TypeScript), Composition API + <code>&lt;script setup&gt;</code>; Options API показан в теории для сравнения. Бэкенд — маленький NestJS-сервис (TypeScript, как принято в Nest), полностью дан в сессии 1: его нужно скопировать и запустить, писать — не нужно. Всё в Docker, как в остальных лабах.</p></div>
+
+<h2 id="sec-1"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-1"></label>1. Зачем фреймворк: DOM руками vs декларативно <a class="anchor" href="#sec-1">#</a></h2>
+
+<p>Список тикетов с фильтром по статусу. Без фреймворка:</p>
+<pre><code>const tickets = [...];                       // данные
+let status = 'open';                          // состояние фильтра
+
+function render() {                           // синхронизация данных с DOM — вручную
+  const ul = document.querySelector('#list');
+  ul.innerHTML = '';
+  for (const t of tickets) {
+    if (status !== 'all' &amp;&amp; t.status !== status) continue;
+    const li = document.createElement('li');
+    li.textContent = `#${t.id} ${t.title}`;
+    li.addEventListener('click', () =&gt; open(t.id));
+    ul.append(li);
+  }
+  document.querySelector('#count').textContent = ul.children.length;
+}
+document.querySelector('#filter').addEventListener('change', e =&gt; { status = e.target.value; render(); });
+render();</code></pre>
+
+<p>Работает. Проблемы начинаются на второй неделе:</p>
+<table>
+<tr><th>Ситуация</th><th>DOM руками</th><th>Vue</th></tr>
+<tr><td>Пришёл новый тикет по WebSocket</td><td>не забыть вызвать <code>render()</code>; иначе список устарел</td><td><code>tickets.push(t)</code> — DOM обновится сам</td></tr>
+<tr><td>Изменился один тикет из 500</td><td><code>innerHTML = ''</code> перерисовывает всё, теряется фокус и скролл</td><td>обновится один <code>&lt;li&gt;</code></td></tr>
+<tr><td>Счётчик, фильтр, список, бейдж в шапке зависят от одних данных</td><td>четыре места, которые надо обновлять согласованно</td><td>четыре выражения в шаблоне, одна переменная</td></tr>
+<tr><td>Тот же список нужен на трёх страницах</td><td>копия <code>render()</code> или хрупкая абстракция</td><td>компонент <code>&lt;TicketList :tickets="…"&gt;</code></td></tr>
+<tr><td>Ошибка: показали <code>undefined</code></td><td>найти, какой из вызовов <code>render()</code> сработал не вовремя</td><td>состояние одно; DOM — его функция</td></tr>
+</table>
+<p>Общий знаменатель: без фреймворка вы поддерживаете <b>два источника правды</b> — данные и DOM — и обязаны вручную держать их в согласии. Vue переворачивает это: вы описываете, <i>как DOM должен выглядеть для данного состояния</i>, а синхронизацию берёт на себя реактивность. Формула: <b>UI = f(state)</b>. Всё остальное — детали того, как эта функция устроена и как её разбивать на части.</p>
+<div class="insight-box"><span class="tag">ГЛАВНАЯ МЫСЛЬ ЛАБЫ</span><p>Vue — это три вещи: <b>реактивность</b> (данные знают, кто от них зависит), <b>компоненты</b> (функция от состояния разбивается на переиспользуемые части с явными входами и выходами) и <b>экосистема</b> (Router — состояние адресной строки, Pinia — состояние, общее для компонентов). Каждое задание — про то, где живёт состояние и кто его меняет. Если вы к концу лабы на любой кусок UI сможете ответить «это состояние — здесь, меняет его — тот, читают — эти», Vue понят.</p></div>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-2">2</a></span><ul>
+<li>📖 Пробежаться: <a href="https://vuejs.org/guide/introduction.html" target="_blank">Vue: Introduction</a> — только «What is Vue» и «Single-File Components», 5 минут.</li>
+</ul></div>
+
+<h2 id="sec-2"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-2"></label>2. Азбука Vue — каждое понятие на примере helpdesk <a class="anchor" href="#sec-2">#</a></h2>
+
+<p>Четырнадцать понятий, без которых не прочитать ни одного компонента. Каждое — определение и несколько строк. В сессии 1 вы напишете это руками.</p>
+
+<h3>2.1 SFC — однофайловый компонент</h3>
+<p>Файл <code>.vue</code> с тремя секциями: <code>&lt;script setup&gt;</code> (логика), <code>&lt;template&gt;</code> (разметка), <code>&lt;style scoped&gt;</code> (стили только этого компонента). Vite компилирует его в обычный JS.</p>
+<pre><code>&lt;script setup&gt;
+import { ref } from 'vue'
+const count = ref(0)                     // всё, что объявлено здесь, доступно в template
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button @click="count++"&gt;Кликов: {{ count }}&lt;/button&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+button { padding: 4px 12px; }            /* не протечёт в другие компоненты */
+&lt;/style&gt;</code></pre>
+
+<h3>2.2 ref и reactive — реактивное состояние</h3>
+<p><code>ref(x)</code> оборачивает значение в объект с полем <code>.value</code>; Vue видит чтения и записи <code>.value</code> и знает, кто зависит. В шаблоне <code>.value</code> не пишется — разворачивается автоматически. <code>reactive(obj)</code> делает реактивным объект целиком (через Proxy), без <code>.value</code>. Правило: <b>ref для всего</b>, <code>reactive</code> — для группы связанных полей формы.</p>
+<pre><code>const status = ref('open')               // примитив → ref
+status.value = 'closed'                  // в скрипте — .value
+
+const filters = reactive({ status: 'open', q: '' })   // объект → reactive
+filters.q = 'ошибка'                     // без .value
+const { q } = filters                    // ❌ деструктуризация теряет реактивность — q теперь просто строка</code></pre>
+
+<h3>2.3 computed — вычисляемое значение</h3>
+<p>Значение, зависящее от других реактивных данных; пересчитывается только когда они изменились, и кэшируется. Это <i>функция</i> от состояния — не место для побочных эффектов.</p>
+<pre><code>const visible = computed(() =&gt;
+  tickets.value.filter(t =&gt; filters.status === 'all' || t.status === filters.status)
+)
+// visible.value — массив; пересчёт при изменении tickets или filters.status, и ни при чём другом</code></pre>
+
+<h3>2.4 watch и watchEffect — реакция на изменение</h3>
+<p><code>watch(source, cb)</code> — «когда <i>это</i> изменится, сделай <i>то</i>»: запрос к API при смене фильтра, синхронизация с URL, логирование. <code>watchEffect(fn)</code> — запускает <code>fn</code> сразу и повторно при изменении всего, что <code>fn</code> прочитала. Для побочных эффектов; для производных значений — <code>computed</code>.</p>
+<pre><code>watch(() =&gt; filters.status, async (next, prev) =&gt; {
+  tickets.value = await api.tickets.list({ status: next })      // побочный эффект: сеть
+})
+watch(filters, save, { deep: true })     // объект целиком: любое вложенное изменение</code></pre>
+
+<h3>2.5 Директивы в шаблоне</h3>
+<table>
+<tr><th>Директива</th><th>Что делает</th><th>Пример</th></tr>
+<tr><td><code>{{ }}</code></td><td>вставить значение (экранируется)</td><td><code>{{ ticket.title }}</code></td></tr>
+<tr><td><code>:attr</code> (<code>v-bind</code>)</td><td>атрибут из выражения</td><td><code>:class="{ urgent: t.priority === 'high' }"</code></td></tr>
+<tr><td><code>@event</code> (<code>v-on</code>)</td><td>обработчик</td><td><code>@click="select(t.id)"</code>, <code>@keyup.enter="submit"</code></td></tr>
+<tr><td><code>v-if / v-else-if / v-else</code></td><td>условный рендер: элемента нет в DOM</td><td><code>&lt;p v-if="loading"&gt;…&lt;/p&gt;</code></td></tr>
+<tr><td><code>v-show</code></td><td><code>display:none</code>: элемент есть, скрыт</td><td>для частого переключения</td></tr>
+<tr><td><code>v-for</code> + <code>:key</code></td><td>список; <code>key</code> — стабильная идентичность элемента</td><td><code>v-for="t in tickets" :key="t.id"</code></td></tr>
+<tr><td><code>v-model</code></td><td>двусторонняя привязка к input / компоненту</td><td><code>&lt;input v-model.trim="filters.q"&gt;</code></td></tr>
+</table>
+
+<h3>2.6 Компонент, props и emits — входы и выходы</h3>
+<p>Компонент — переиспользуемая часть UI с явным контрактом: <b>props</b> — что он принимает (только чтение), <b>emits</b> — какие события посылает наверх. Данные текут вниз, события — вверх (one-way data flow). Ребёнок <b>не меняет</b> props.</p>
+<pre><code>&lt;!-- TicketCard.vue --&gt;
+&lt;script setup&gt;
+const props = defineProps({
+  ticket:   { type: Object, required: true },
+  selected: { type: Boolean, default: false },
+})
+const emit = defineEmits(['select', 'status-change'])
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;article :class="{ selected }" @click="emit('select', ticket.id)"&gt;
+    &lt;h3&gt;{{ ticket.title }}&lt;/h3&gt;
+    &lt;select :value="ticket.status" @change="emit('status-change', ticket.id, $event.target.value)"&gt;…&lt;/select&gt;
+  &lt;/article&gt;
+&lt;/template&gt;
+
+&lt;!-- родитель --&gt;
+&lt;TicketCard :ticket="t" :selected="t.id === selectedId" @select="selectedId = $event" @status-change="changeStatus" /&gt;</code></pre>
+
+<h3>2.7 v-model на компоненте — defineModel</h3>
+<p>Сахар над парой «prop <code>modelValue</code> + событие <code>update:modelValue</code>». В Vue 3.4+ — <code>defineModel()</code>: компонент получает ref, который синхронизирован с родителем.</p>
+<pre><code>&lt;!-- SearchInput.vue --&gt;
+&lt;script setup&gt;
+const model = defineModel({ type: String, default: '' })
+&lt;/script&gt;
+&lt;template&gt;&lt;input :value="model" @input="model = $event.target.value" placeholder="Поиск" /&gt;&lt;/template&gt;
+
+&lt;!-- родитель --&gt;
+&lt;SearchInput v-model="filters.q" /&gt;</code></pre>
+
+<h3>2.8 Слоты — контент от родителя</h3>
+<p>Props передают <i>данные</i>, слоты — <i>разметку</i>. Компонент <code>BaseModal</code> не знает, что внутри; родитель кладёт что угодно. Именованные слоты — несколько «дырок»; scoped-слоты — компонент отдаёт данные в разметку родителя.</p>
+<pre><code>&lt;!-- BaseModal.vue --&gt;
+&lt;template&gt;
+  &lt;div class="modal"&gt;
+    &lt;header&gt;&lt;slot name="title"&gt;Без названия&lt;/slot&gt;&lt;/header&gt;     &lt;!-- дефолт, если не передали --&gt;
+    &lt;slot /&gt;                                                   &lt;!-- default-слот --&gt;
+    &lt;footer&gt;&lt;slot name="actions" :close="close" /&gt;&lt;/footer&gt;    &lt;!-- scoped: отдаёт close наверх --&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;!-- родитель --&gt;
+&lt;BaseModal&gt;
+  &lt;template #title&gt;Новый тикет&lt;/template&gt;
+  &lt;TicketForm @saved="…" /&gt;
+  &lt;template #actions="{ close }"&gt;&lt;button @click="close"&gt;Отмена&lt;/button&gt;&lt;/template&gt;
+&lt;/BaseModal&gt;</code></pre>
+
+<h3>2.9 Жизненный цикл</h3>
+<p>Компонент рождается (setup → монтирование в DOM), живёт (обновления), умирает (размонтирование). Хуки: <code>onMounted</code> — DOM есть, можно мерить, подписываться, фокусировать; <code>onUnmounted</code> — отписаться, остановить таймеры, закрыть сокет. <code>setup</code> сам по себе — «до монтирования». Забытая отписка в <code>onUnmounted</code> — самая частая утечка.</p>
+<pre><code>onMounted(() =&gt; socket.on('ticket.updated', apply))
+onUnmounted(() =&gt; socket.off('ticket.updated', apply))</code></pre>
+
+<h3>2.10 Composable — переиспользуемая логика</h3>
+<p>Функция <code>useXxx()</code>, которая внутри использует <code>ref/computed/watch/хуки</code> и возвращает реактивные значения. Это способ вынести <i>логику</i> (загрузка с индикатором, debounce, подписка на сокет) из компонента — как компонент выносит разметку. Composable вызывается в <code>setup</code>, состояние у каждого вызова своё.</p>
+<pre><code>export function useAsync(fn) {
+  const data = ref(null), error = ref(null), loading = ref(false)
+  async function run(...args) {
+    loading.value = true; error.value = null
+    try { data.value = await fn(...args) } catch (e) { error.value = e } finally { loading.value = false }
+  }
+  return { data, error, loading, run }
+}
+// в компоненте:
+const { data: ticket, loading, run } = useAsync(id =&gt; api.tickets.get(id))</code></pre>
+
+<h3>2.11 provide / inject — данные через уровни</h3>
+<p>Родитель <code>provide('key', value)</code>, любой потомок на любой глубине <code>inject('key')</code>. Для «инфраструктурных» вещей: тема, тосты, текущий пользователь в поддереве. Не замена Pinia: без реактивного обёртывания и без единого места изменения.</p>
+
+<h3>2.12 Template refs и Teleport</h3>
+<p><code>useTemplateRef('name')</code> + <code>ref="name"</code> в шаблоне — доступ к DOM-элементу или экземпляру дочернего компонента (фокус, скролл). <code>&lt;Teleport to="body"&gt;</code> — рендерит содержимое в другое место DOM (модалки, тосты), оставаясь логически внутри компонента.</p>
+
+<h3>2.13 Router и Pinia — состояние вне компонентов</h3>
+<p><b>Vue Router</b> — адресная строка как состояние: <code>/tickets/42/comments</code> → какой компонент показать и с какими параметрами. <b>Pinia</b> — состояние, которое нужно многим компонентам сразу (текущий пользователь, кэш тикетов, тосты): один store, компоненты читают и зовут actions. Подробно — разделы 5 и 6.</p>
+
+<h3>2.14 Options API vs Composition API</h3>
+<pre><code>// Options API (Vue 2 стиль, работает и в 3)          // Composition API + &lt;script setup&gt; (мы пишем так)
+export default {                                       &lt;script setup&gt;
+  data() { return { count: 0 } },                      const count = ref(0)
+  computed: { double() { return this.count * 2 } },    const double = computed(() =&gt; count.value * 2)
+  methods: { inc() { this.count++ } },                 function inc() { count.value++ }
+  mounted() { … },                                     onMounted(() =&gt; { … })
+}                                                      &lt;/script&gt;</code></pre>
+<p>Options группирует по <i>типу</i> (все data, все methods), Composition — по <i>смыслу</i> (всё про фильтр вместе, всё про сокет вместе) и позволяет выносить смысл в composable. В чужом коде встретите оба; в лабе — только Composition.</p><div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-3">3</a></span><ul>
+<li>✅ Хочется потрогать — сессия 1 (шаги 1.3–1.5) повторяет пункты 2.1–2.7 кодом в «песочнице». Можно прочитать разделы 3–8 после неё.</li>
+</ul></div>
+
+<h2 id="sec-3"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-3"></label>3. Реактивность под капотом <a class="anchor" href="#sec-3">#</a></h2>
+
+<p>Понимать это не обязательно, чтобы писать компоненты, — но обязательно, чтобы понимать, почему «оно не обновилось».</p>
+<pre>const state = reactive({ status: 'open' })      Proxy вокруг объекта
+                                                 │
+computed / template / watch  ──читает──▶  get-ловушка: «этот эффект зависит от state.status»
+                                                 │           (запись в карту зависимостей)
+state.status = 'closed'      ──пишет───▶  set-ловушка: «кто зависел от status? — перезапустить»
+                                                 │
+                                          эффекты ставятся в очередь; DOM обновляется ОДИН раз,
+                                          асинхронно, после текущего тика (await nextTick())</pre>
+
+<table>
+<tr><th>Симптом</th><th>Причина</th><th>Что делать</th></tr>
+<tr><td>Изменил переменную — шаблон не обновился</td><td>переменная не реактивна: обычный <code>let</code>, или деструктурировали <code>reactive</code>, или потеряли <code>.value</code></td><td><code>ref()</code>; <code>toRefs(state)</code> при деструктуризации; <code>.value</code> в скрипте</td></tr>
+<tr><td>Прочитал DOM сразу после изменения — старое значение</td><td>обновление DOM асинхронное (batching)</td><td><code>await nextTick()</code></td></tr>
+<tr><td>Массив меняю по индексу / <code>length</code> — обновляется (в Vue 3 да)</td><td>Proxy ловит всё, в отличие от Vue 2</td><td>ничего; но <code>arr = arr.filter(...)</code> для ref-массива — присвоить в <code>.value</code></td></tr>
+<tr><td><code>watch(obj, cb)</code> не срабатывает на <code>obj.field = x</code></td><td>для ref-объекта watch по умолчанию не глубокий</td><td><code>{ deep: true }</code> или <code>watch(() =&gt; obj.value.field, cb)</code></td></tr>
+<tr><td>Огромный список из API тормозит</td><td>Vue сделал реактивным каждый объект глубоко</td><td><code>shallowRef</code> / <code>markRaw</code> для данных, которые не меняются</td></tr>
+<tr><td><code>computed</code> «не пересчитался»</td><td>внутри прочитано нереактивное (например, <code>Date.now()</code>, <code>localStorage</code>)</td><td>сделать источник реактивным или использовать <code>watch</code></td></tr>
+</table>
+<details class="deep"><summary>🔬 Под капотом: ref — это тоже объект с get/set, и почему в шаблоне .value не нужен</summary><div class="deep-body">
+
+<p><code>ref(0)</code> возвращает объект <code>{ value: 0 }</code> с геттером и сеттером на <code>value</code>, которые делают то же, что ловушки Proxy. Поэтому примитивы тоже отслеживаются — через объект-обёртку. В шаблоне компилятор видит, что <code>count</code> — ref верхнего уровня, и сам подставляет <code>.value</code>. Внутри <code>reactive</code>-объекта вложенные ref тоже разворачиваются: <code>state.count</code> вместо <code>state.count.value</code>. А в массиве — нет: <code>list[0].value</code>. Эти три правила покрывают 95 % «почему тут .value, а тут нет».</p>
+<p><b>Стабильность ключей.</b> <code>v-for</code> с <code>:key="t.id"</code> нужен не «для устранения warning»: по ключу Vue понимает, какой DOM-узел соответствует какому элементу, и при удалении второго тикета из пяти уберёт один узел, а не перерисует четыре. Ключ по индексу ломает это: при удалении элемента все последующие «меняют содержимое», теряя состояние инпутов внутри.</p>
+</div></details>
+
+<h2 id="sec-4"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-4"></label>4. Компонентная архитектура <a class="anchor" href="#sec-4">#</a></h2>
+
+<h3>4.1 Где живёт состояние</h3>
+<p>Главный вопрос при проектировании. Ответ по возрастанию «радиуса»:</p>
+<table>
+<tr><th>Кому нужно</th><th>Где хранить</th><th>Пример в helpdesk</th></tr>
+<tr><td>одному компоненту</td><td>локальный <code>ref</code> в нём</td><td>открыт ли dropdown, текст в поле поиска до отправки</td></tr>
+<tr><td>компоненту и его детям</td><td><code>ref</code> у родителя, вниз через props, вверх через emits</td><td>выбранный тикет в списке + карточки</td></tr>
+<tr><td>поддереву на глубине</td><td><code>provide/inject</code></td><td>функция <code>toast()</code> для всех форм</td></tr>
+<tr><td>всему приложению / между страницами</td><td>Pinia store</td><td>текущий пользователь, кэш тикетов</td></tr>
+<tr><td>должно переживать перезагрузку / шариться ссылкой</td><td>URL (Router) и/или localStorage</td><td>фильтры списка — в query; токен — в localStorage</td></tr>
+</table>
+<p>Ошибка новичка — тащить всё в Pinia («глобально же удобнее»). Состояние с минимальным радиусом проще тестировать и невозможно сломать из другого места.</p>
+
+<h3>4.2 Presentational vs container</h3>
+<p><b>Презентационные</b> компоненты (<code>TicketCard</code>, <code>BaseModal</code>, <code>StatusBadge</code>) получают всё через props, ничего не знают про API и store, пере­используемы и тестируемы. <b>Контейнеры</b> (страницы, <code>BoardView</code>) знают про store и роутер, загружают данные и раздают их вниз. Хорошее соотношение — много первых, мало вторых.</p>
+
+<h3>4.3 Props vs slots</h3>
+<p>Если родитель хочет передать <i>данные</i> — props. Если <i>разметку</i> (что показать в теле модалки, как выглядит пустое состояние списка) — слот. Компонент с 12 булевыми props типа <code>showTitle</code>, <code>showFooter</code> — кандидат на слоты.</p>
+
+<h3>4.4 Контракт компонента</h3>
+<pre><code>&lt;script setup&gt;
+// 1. входы — со схемой: тип, обязательность, дефолт, валидатор
+const props = defineProps({
+  ticket:   { type: Object, required: true },
+  compact:  { type: Boolean, default: false },
+  priority: { type: String, default: 'medium', validator: v =&gt; ['low', 'medium', 'high'].includes(v) },
+})
+// 2. выходы — перечислены; Vue предупредит о незадекларированном emit
+const emit = defineEmits(['select', 'status-change'])
+// 3. модель — если компонент «редактирует значение» родителя
+const q = defineModel('q', { type: String, default: '' })
+// 4. что торчит наружу для template ref — только явно
+defineExpose({ focus })
+&lt;/script&gt;</code></pre>
+<p>Всё, что не в этих четырёх местах, — приватная деталь компонента. Это те же принципы, что в ООП-лабе: явный контракт снаружи, инкапсуляция внутри.</p>
+<h2 id="sec-5"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-5"></label>5. Vue Router — адрес как состояние <a class="anchor" href="#sec-5">#</a></h2>
+
+<table>
+<tr><th>Понятие</th><th>Что это</th><th>В helpdesk</th></tr>
+<tr><td>Route</td><td>путь → компонент</td><td><code>{ path: '/tickets', component: TicketsListView }</code></td></tr>
+<tr><td>Params</td><td>динамические сегменты, часть идентичности страницы</td><td><code>/tickets/:id</code> → <code>route.params.id</code>; удобнее <code>props: true</code> — приходит как prop</td></tr>
+<tr><td>Query</td><td>необязательные параметры, не меняют «какая страница»</td><td><code>/tickets?status=open&amp;q=vpn</code> — фильтры; шарятся ссылкой</td></tr>
+<tr><td>Nested routes</td><td>страница внутри страницы, свой <code>&lt;RouterView&gt;</code></td><td><code>/tickets/42/comments</code>, <code>/tickets/42/history</code> — вкладки</td></tr>
+<tr><td>Named routes</td><td>ссылка по имени, а не по строке пути</td><td><code>router.push({ name: 'ticket', params: { id } })</code></td></tr>
+<tr><td>Navigation guards</td><td>хук до перехода: разрешить / перенаправить</td><td><code>beforeEach</code>: нет токена → <code>/login</code></td></tr>
+<tr><td>Lazy loading</td><td>компонент страницы грузится при первом заходе</td><td><code>component: () =&gt; import('./views/BoardView.vue')</code> — отдельный чанк</td></tr>
+<tr><td>History mode</td><td><code>createWebHistory</code> — обычные URL без <code>#</code></td><td>сервер должен отдавать <code>index.html</code> на любой путь (Vite dev делает сам)</td></tr>
+<tr><td><code>useRoute()</code> / <code>useRouter()</code></td><td>текущий маршрут (реактивный) / объект для навигации</td><td>читать params и query / <code>push</code>, <code>replace</code>, <code>back</code></td></tr>
+</table>
+<details class="deep"><summary>🔬 Под капотом: почему фильтры — в query, а не в ref</summary><div class="deep-body">
+
+<p>Если фильтры списка живут в локальном <code>ref</code>, они пропадают при F5, их нельзя отправить коллеге ссылкой, а кнопка «назад» из тикета возвращает в неотфильтрованный список. Хранить их в <code>route.query</code> решает все три проблемы — но требует двусторонней синхронизации: query → состояние формы при загрузке, состояние → query при изменении (<code>router.replace</code>, чтобы не засорять историю). Это делает composable <code>useRouteQuery</code> в сессии 3 — типичный пример «логика, которую хочется вынести».</p>
+</div></details>
+
+<h2 id="sec-6"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-6"></label>6. Pinia — общее состояние <a class="anchor" href="#sec-6">#</a></h2>
+<pre><code>// stores/tickets.js — setup-синтаксис (как composable, но один на всё приложение)
+export const useTicketsStore = defineStore('tickets', () =&gt; {
+  const items = ref([])                                          // state
+  const byId  = computed(() =&gt; Object.fromEntries(items.value.map(t =&gt; [t.id, t])))   // getter
+  const open  = computed(() =&gt; items.value.filter(t =&gt; t.status === 'open'))
+
+  async function load(params) { items.value = await api.tickets.list(params) }        // actions
+  function upsert(ticket) {
+    const i = items.value.findIndex(t =&gt; t.id === ticket.id)
+    i === -1 ? items.value.push(ticket) : items.value.splice(i, 1, ticket)
+  }
+  return { items, byId, open, load, upsert }
+})
+
+// в компоненте
+const store = useTicketsStore()
+const { items, open } = storeToRefs(store)     // ❗ без storeToRefs деструктуризация теряет реактивность
+store.load({ status: 'open' })                 // actions — деструктурировать можно как есть</code></pre>
+
+<table>
+<tr><th>Вопрос</th><th>Ответ</th></tr>
+<tr><td>Store или composable?</td><td>composable — состояние на каждый вызов своё (форма, загрузка); store — одно на приложение (пользователь, кэш). Пишутся одинаково.</td></tr>
+<tr><td>Кто меняет state?</td><td>только actions store. Компонент, который делает <code>store.items.push()</code> напрямую, — работает, но через месяц никто не найдёт, откуда взялся дубликат.</td></tr>
+<tr><td>Store использует другой store?</td><td>да: <code>const auth = useAuthStore()</code> внутри setup-функции. Циклы — нет.</td></tr>
+<tr><td>Persist</td><td>плагин (10 строк, сессия 4) или сторонний <code>pinia-plugin-persistedstate</code>; сохранять токен — да, кэш тикетов — нет.</td></tr>
+<tr><td>Тесты</td><td><code>setActivePinia(createPinia())</code> в <code>beforeEach</code>; api — подменить через <code>vi.mock</code>.</td></tr>
+<tr><td>Devtools</td><td>Vue Devtools показывает state, getters, историю actions — включите с первого дня.</td></tr>
+</table>
+
+<h2 id="sec-7"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-7"></label>7. Данные: API-слой, загрузка, ошибки, WebSocket <a class="anchor" href="#sec-7">#</a></h2>
+
+<p>Компонент не должен вызывать <code>fetch</code> сам. Слои:</p>
+<pre>Компонент / View                       знает: что показать при loading / error / data
+   │  вызывает
+Store (Pinia) или composable           знает: кэш, оптимистичные обновления, повтор запроса
+   │  вызывает
+src/api/tickets.js                     знает: URL, метод, форму ответа  → { list(params), get(id), update(id, patch) }
+   │  вызывает
+src/api/http.js                        знает: base URL, заголовок Authorization, парсинг ошибок → ApiError
+   │
+fetch                                  браузер
+
+WebSocket (socket.io-client) → composable useSocket → store.upsert(ticket)   (сессия 5)</pre>
+
+<p>Три состояния любой загрузки — <code>loading</code>, <code>error</code>, <code>data</code> — должны быть отражены в UI всегда, не только «когда вспомнили». Composable <code>useAsync</code> (2.10) делает это правило дешёвым. Оптимистичное обновление (сессия 4): показать изменение сразу, откатить при ошибке — это работа store, потому что откат должен быть согласован для всех, кто читает данные.</p>
+
+<h2 id="sec-8"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-8"></label>8. Стек, структура проекта, поток данных <a class="anchor" href="#sec-8">#</a></h2>
+
+<table>
+<tr><th>Компонент</th><th>Выбор</th><th>Зачем</th></tr>
+<tr><td>Фронтенд</td><td>Vue 3.5, Vite 6, JavaScript</td><td>Composition API, <code>&lt;script setup&gt;</code>, <code>defineModel</code>, <code>useTemplateRef</code></td></tr>
+<tr><td>Роутинг / состояние</td><td>Vue Router 4, Pinia 2</td><td>официальный стек</td></tr>
+<tr><td>Тесты</td><td>Vitest + @vue/test-utils + jsdom</td><td>ставится скаффолдом <code>create-vue</code></td></tr>
+<tr><td>Realtime</td><td>socket.io-client</td><td>Nest gateway на той же библиотеке</td></tr>
+<tr><td>Бэкенд</td><td>NestJS 11, in-memory данные</td><td>знакомый; дан целиком, не пишется</td></tr>
+<tr><td>Инфраструктура</td><td>Docker Compose: <code>api</code>, <code>web</code></td><td>как в остальных лабах; Vite проксирует <code>/api</code> и <code>/socket.io</code> в <code>api</code></td></tr>
+</table>
+<pre>vue-helpdesk-lab/
+├── docker-compose.yml
+├── server/                        NestJS (дан в 1.2): auth, tickets, comments, history, events-gateway
+└── web/                           Vue (create-vue: router, pinia, vitest)
+    ├── vite.config.js             proxy /api → api:3000, /socket.io → ws
+    └── src/
+        ├── main.js                createApp → use(router) → use(pinia) → mount
+        ├── App.vue                AppHeader + &lt;RouterView&gt; + ToastHost
+        ├── api/                   http.js (fetch-обёртка, ApiError), auth.js, tickets.js
+        ├── composables/           useAsync, useDebounce, useRouteQuery, useSocket
+        ├── components/
+        │   ├── ui/                BaseButton, BaseInput (defineModel), BaseModal (Teleport+slots), StatusBadge
+        │   ├── ticket/            TicketCard, TicketList, TicketForm, FilterBar
+        │   └── layout/            AppHeader, ToastHost
+        ├── router/index.js        routes, lazy import, guards
+        ├── stores/                auth.js, tickets.js, ui.js, plugins/persist.js
+        ├── views/                 LoginView, PlaygroundView, TicketsListView, BoardView, NewTicketView,
+        │                          TicketDetailsView (+ tabs: DetailsTab, CommentsTab, HistoryTab), NotFoundView
+        └── __tests__/             *.spec.js</pre>
+
+<h3>Поток одного действия: сменить статус тикета на канбане</h3>
+<pre>KanbanColumn ── @status-change(id, 'resolved') ──▶ BoardView (контейнер)
+                                                     │  ticketsStore.changeStatus(id, 'resolved')
+                                                     ▼
+                                          ticketsStore.changeStatus:
+                                             1. запомнить старый тикет
+                                             2. upsert({...t, status}) ─▶ все computed/шаблоны обновились (оптимистично)
+                                             3. await api.tickets.update(id, { status })
+                                             4. ошибка → upsert(старый) + uiStore.toast('Не удалось')
+                                                     │
+                                       Nest: PATCH /api/tickets/42 → history entry → gateway.emit('ticket.updated')
+                                                     │
+                                       useSocket ── 'ticket.updated' ──▶ ticketsStore.upsert(ticket)   (у всех открытых вкладок)</pre>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-9">9</a></span><ul>
+<li>📖 Почитать: <a href="https://vuejs.org/guide/essentials/reactivity-fundamentals.html" target="_blank">Reactivity Fundamentals</a> и <a href="https://vuejs.org/guide/components/props.html" target="_blank">Props</a> — по 10 минут; сессии 1–2 их закрепят.</li>
+<li>🧩 Поставить <a href="https://devtools.vuejs.org/" target="_blank">Vue Devtools</a> в браузер.</li>
+<li>✅ Docker; свободны порты 5173 (web) и 3000 (api).</li>
+</ul></div>
+
+<h2 id="sec-9"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-9"></label>9. Задания: пять сессий <a class="anchor" href="#sec-9">#</a></h2>
+
+<p>Каждая сессия заканчивается рабочим приложением. Порядок строгий: Pinia (3) раньше Router (4), потому что guard'ам роутера нужен auth-store. Ответы «проверь себя» — в <span class="file">docs/vue-notes.md</span>.</p>
+<table>
+<tr><th>Сессия</th><th>Тема</th><th>Концепции</th><th>Результат</th></tr>
+<tr><td>1</td><td>Стенд, бэкенд, песочница реактивности, первый запрос</td><td>SFC, ref/reactive/computed/watch, директивы, v-model, v-for/key, useAsync</td><td>список тикетов с API и фильтром в одном файле</td></tr>
+<tr><td>2</td><td>Компоненты</td><td>props/emits, defineModel, слоты, Teleport, provide/inject, lifecycle, template refs, composables</td><td>тот же список, разобранный на 8 компонентов + модалка + тосты</td></tr>
+<tr><td>3</td><td>Pinia</td><td>store: state/getters/actions, storeToRefs, auth + токен, persist-плагин, оптимистичные обновления</td><td>логин, кэш тикетов, смена статуса с откатом</td></tr>
+<tr><td>4</td><td>Vue Router</td><td>routes, lazy, guards, params/props, nested routes, query-синхронизация, 404</td><td>многостраничное приложение: список, тикет с вкладками, новый тикет, логин</td></tr>
+<tr><td>5</td><td>Продвинутое</td><td>WebSocket + отписка, TransitionGroup, dynamic component, Vitest (компонент, composable, store, guard), build</td><td>канбан с живыми обновлениями, 12 тестов, production-сборка</td></tr>
+</table>
+<div class="session-banner" id="session-1">Сессия <a href="#session-1" style="color:#fff;text-decoration:none">1</a> — Стенд, бэкенд, песочница реактивности, первый запрос <span>~3 часа</span></div>
+<div class="step" id="step-1-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-1"></label><span class="num">Шаг 1.1</span>Стенд: docker-compose, скаффолды Nest и create-vue<a class="anchor" href="#step-1-1">#</a></span><div class="step-body">
+<pre><code>mkdir vue-helpdesk-lab &amp;&amp; cd vue-helpdesk-lab &amp;&amp; git init
+# скаффолды через контейнер node:22 (или локально, если Node 22 установлен)
+docker run --rm -it -v "$PWD":/app -w /app node:22 npx @nestjs/cli@latest new server --skip-git --package-manager npm
+docker run --rm -it -v "$PWD":/app -w /app node:22 npm create vue@latest web -- --router --pinia --vitest</code></pre>
+<pre><code># docker-compose.yml
+services:
+  api:
+    image: node:22
+    working_dir: /app
+    volumes: [./server:/app]
+    environment: { LATENCY_MS: "300" }          # искусственная задержка, чтобы состояния loading были видны
+    command: sh -c "npm install &amp;&amp; npm run start:dev"
+    ports: ["3000:3000"]
+
+  web:
+    image: node:22
+    working_dir: /app
+    volumes: [./web:/app]
+    command: sh -c "npm install &amp;&amp; npm run dev -- --host"
+    ports: ["5173:5173"]
+    depends_on: [api]</code></pre>
+<pre><code>// web/vite.config.js — заменить server-секцию (остальное оставить как сгенерировано)
+export default defineConfig({
+  plugins: [vue()],
+  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  server: {
+    host: true,
+    port: 5173,
+    proxy: {
+      '/api':       { target: 'http://api:3000', changeOrigin: true },
+      '/socket.io': { target: 'http://api:3000', ws: true },
+    },
+  },
+})</code></pre>
+<pre><code># web: убрать примеры скаффолда, оставить каркас
+rm -rf web/src/components/* web/src/views/* web/src/assets/*
+cat &gt; web/src/assets/main.css &lt;&lt;'EOF'
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; color: #1c1c1c; background: #f7f7f9; }
+main { max-width: 960px; margin: 0 auto; padding: 24px; }
+button { cursor: pointer; }
+EOF</code></pre>
+<pre><code>&lt;!-- web/src/App.vue — пока без роутера: подключим в сессии 4 --&gt;
+&lt;script setup&gt;
+import PlaygroundView from './views/PlaygroundView.vue'
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;main&gt;
+    &lt;PlaygroundView /&gt;
+  &lt;/main&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>// web/src/main.js — как сгенерировано; роутер и pinia уже подключены, мешать не будут
+import './assets/main.css'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import router from './router'
+
+createApp(App).use(createPinia()).use(router).mount('#app')</code></pre>
+<pre><code>// web/src/router/index.js — временно пустой список маршрутов
+import { createRouter, createWebHistory } from 'vue-router'
+export default createRouter({ history: createWebHistory(import.meta.env.BASE_URL), routes: [] })</code></pre>
+<div class="why"><b>Зачем:</b> Два контейнера, оба — <code>node:22</code> с примонтированным кодом, никаких Dockerfile: для dev-режима этого достаточно. Vite проксирует <code>/api</code> и <code>/socket.io</code> в контейнер <code>api</code> — фронтенд ходит на свой же origin, CORS не нужен, и в проде тот же путь отдаст nginx. <code>LATENCY_MS</code> — чтобы индикаторы загрузки было видно глазами; в реальном API их видно и так.</div>
+</div></div>
+<div class="step" id="step-1-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-2"></label><span class="num">Шаг 1.2</span>Бэкенд NestJS: auth, tickets, comments, history, WebSocket-gateway (дано)<a class="anchor" href="#step-1-2">#</a></span><div class="step-body">
+<p>Бэкенд дан целиком. Данные в памяти (перезапуск = сброс), токены игрушечные. Замените содержимое <code>server/src/</code> на эти файлы.</p><pre><code>cd server &amp;&amp; npm i @nestjs/websockets @nestjs/platform-socket.io socket.io &amp;&amp; cd ..</code></pre>
+<pre><code>// server/src/main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  await app.listen(3000, '0.0.0.0');
+}
+bootstrap();
+
+// server/src/app.module.ts
+import { Module } from '@nestjs/common';
+import { AuthModule } from './auth/auth.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { EventsModule } from './events/events.module';
+
+@Module({ imports: [AuthModule, TicketsModule, EventsModule] })
+export class AppModule {}</code></pre>
+<pre><code>// server/src/data.ts — типы и сид
+export type Status = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type Priority = 'low' | 'medium' | 'high';
+export interface User { id: number; email: string; name: string; role: 'agent' | 'admin'; password: string }
+export interface Ticket {
+  id: number; title: string; description: string; status: Status; priority: Priority;
+  assigneeId: number | null; reporter: string; tags: string[]; createdAt: string; updatedAt: string;
+}
+export interface Comment { id: number; ticketId: number; authorId: number; body: string; createdAt: string }
+export interface HistoryEntry { id: number; ticketId: number; userId: number; field: string; from: string | null; to: string | null; at: string }
+
+export const users: User[] = [
+  { id: 1, email: 'anna@helpdesk.test',  name: 'Анна',  role: 'agent', password: 'secret' },
+  { id: 2, email: 'boris@helpdesk.test', name: 'Борис', role: 'admin', password: 'secret' },
+];
+
+const titles: [string, Status, Priority, string[]][] = [
+  ['Не работает VPN из дома', 'open', 'high', ['network', 'vpn']],
+  ['Принтер на 3 этаже печатает пустые листы', 'open', 'medium', ['hardware']],
+  ['Нужен доступ к Jira проекту HD', 'in_progress', 'low', ['access']],
+  ['Outlook не синхронизирует календарь', 'in_progress', 'medium', ['mail']],
+  ['Ноутбук перегревается и выключается', 'open', 'high', ['hardware']],
+  ['Сброс пароля от корпоративного Wi-Fi', 'resolved', 'low', ['network']],
+  ['Ошибка 500 на странице отчётов', 'open', 'high', ['web', 'bug']],
+  ['Заменить мышь', 'closed', 'low', ['hardware']],
+  ['Не приходят письма от внешних отправителей', 'in_progress', 'high', ['mail']],
+  ['Установить Docker Desktop', 'resolved', 'medium', ['software']],
+  ['Монитор мерцает', 'open', 'medium', ['hardware']],
+  ['Лицензия IDE истекла', 'closed', 'medium', ['software', 'license']],
+];
+const day = 86_400_000;
+export const tickets: Ticket[] = titles.map(([title, status, priority, tags], i) =&gt; ({
+  id: i + 1, title, description: `Подробности по обращению «${title}».`, status, priority, tags,
+  assigneeId: status === 'open' ? null : (i % 2) + 1, reporter: `user${i + 1}@corp.test`,
+  createdAt: new Date(Date.now() - (12 - i) * day).toISOString(),
+  updatedAt: new Date(Date.now() - (12 - i) * day + 3_600_000).toISOString(),
+}));
+export const comments: Comment[] = [
+  { id: 1, ticketId: 1, authorId: 1, body: 'Проверьте, обновлён ли клиент VPN до 5.2', createdAt: tickets[0].updatedAt },
+  { id: 2, ticketId: 3, authorId: 2, body: 'Заявка отправлена админам Jira', createdAt: tickets[2].updatedAt },
+];
+export const history: HistoryEntry[] = [];
+
+export const sleep = () =&gt; new Promise(r =&gt; setTimeout(r, Number(process.env.LATENCY_MS ?? 0)));</code></pre>
+<pre><code>// server/src/auth/auth.service.ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { users, User } from '../data';
+
+@Injectable()
+export class AuthService {
+  private tokens = new Map&lt;string, number&gt;();                       // token → userId (игрушечно, в памяти)
+
+  login(email: string, password: string) {
+    const user = users.find(u =&gt; u.email === email &amp;&amp; u.password === password);
+    if (!user) throw new UnauthorizedException('Неверный e-mail или пароль');
+    const token = `t-${user.id}-${Math.random().toString(36).slice(2)}`;
+    this.tokens.set(token, user.id);
+    return { token, user: this.publicUser(user) };
+  }
+
+  userByToken(token?: string): User | null {
+    const id = token ? this.tokens.get(token) : undefined;
+    return users.find(u =&gt; u.id === id) ?? null;
+  }
+
+  publicUser(u: User) { const { password, ...rest } = u; return rest; }
+}
+
+// server/src/auth/auth.guard.ts
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthService } from './auth.service';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(private auth: AuthService) {}
+  canActivate(ctx: ExecutionContext): boolean {
+    const req = ctx.switchToHttp().getRequest();
+    const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
+    const user = this.auth.userByToken(token);
+    if (!user) throw new UnauthorizedException('Требуется вход');
+    req.user = user;
+    return true;
+  }
+}
+
+// server/src/auth/auth.controller.ts
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthGuard } from './auth.guard';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private auth: AuthService) {}
+  @Post('login') login(@Body() body: { email: string; password: string }) { return this.auth.login(body.email, body.password); }
+  @UseGuards(AuthGuard) @Get('me') me(@Req() req) { return this.auth.publicUser(req.user); }
+}
+
+// server/src/auth/auth.module.ts
+import { Module } from '@nestjs/common';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { AuthGuard } from './auth.guard';
+
+@Module({ controllers: [AuthController], providers: [AuthService, AuthGuard], exports: [AuthService, AuthGuard] })
+export class AuthModule {}</code></pre>
+<pre><code>// server/src/events/events.gateway.ts
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { Ticket } from '../data';
+
+@WebSocketGateway({ cors: { origin: '*' } })
+export class EventsGateway {
+  @WebSocketServer() server: Server;
+  ticketUpdated(ticket: Ticket) { this.server.emit('ticket.updated', ticket); }
+}
+
+// server/src/events/events.module.ts
+import { Module } from '@nestjs/common';
+import { EventsGateway } from './events.gateway';
+
+@Module({ providers: [EventsGateway], exports: [EventsGateway] })
+export class EventsModule {}</code></pre>
+<pre><code>// server/src/tickets/tickets.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { comments, history, sleep, tickets, Ticket, User } from '../data';
+import { EventsGateway } from '../events/events.gateway';
+
+@Injectable()
+export class TicketsService {
+  constructor(private events: EventsGateway) {}
+
+  async list(q: { status?: string; priority?: string; q?: string; page?: string; limit?: string }) {
+    await sleep();
+    let items = tickets;
+    if (q.status &amp;&amp; q.status !== 'all') items = items.filter(t =&gt; t.status === q.status);
+    if (q.priority) items = items.filter(t =&gt; t.priority === q.priority);
+    if (q.q) { const s = q.q.toLowerCase(); items = items.filter(t =&gt; t.title.toLowerCase().includes(s) || t.tags.some(tag =&gt; tag.includes(s))); }
+    const page = Math.max(1, Number(q.page ?? 1)), limit = Math.min(50, Number(q.limit ?? 20));
+    return { items: items.slice((page - 1) * limit, page * limit), total: items.length, page, limit };
+  }
+
+  async get(id: number) { await sleep(); return this.find(id); }
+
+  create(dto: Pick&lt;Ticket, 'title' | 'description' | 'priority' | 'tags'&gt;, user: User) {
+    const now = new Date().toISOString();
+    const ticket: Ticket = { id: Math.max(...tickets.map(t =&gt; t.id)) + 1, ...dto, tags: dto.tags ?? [], status: 'open', assigneeId: null, reporter: user.email, createdAt: now, updatedAt: now };
+    tickets.push(ticket);
+    this.events.ticketUpdated(ticket);
+    return ticket;
+  }
+
+  async update(id: number, patch: Partial&lt;Pick&lt;Ticket, 'status' | 'priority' | 'assigneeId' | 'title'&gt;&gt;, user: User) {
+    await sleep();
+    if (patch.status === 'closed' &amp;&amp; user.role !== 'admin') throw new NotFoundException('Закрывать тикеты может только admin');   // 404 нарочно грубо; см. вопрос 3.3
+    const t = this.find(id);
+    for (const [field, to] of Object.entries(patch)) {
+      const from = (t as any)[field];
+      if (from === to) continue;
+      history.push({ id: history.length + 1, ticketId: id, userId: user.id, field, from: String(from ?? ''), to: String(to ?? ''), at: new Date().toISOString() });
+      (t as any)[field] = to;
+    }
+    t.updatedAt = new Date().toISOString();
+    this.events.ticketUpdated(t);
+    return t;
+  }
+
+  comments(id: number) { this.find(id); return comments.filter(c =&gt; c.ticketId === id); }
+  history(id: number)  { this.find(id); return history.filter(h =&gt; h.ticketId === id); }
+
+  addComment(id: number, body: string, user: User) {
+    this.find(id);
+    const c = { id: comments.length + 1, ticketId: id, authorId: user.id, body, createdAt: new Date().toISOString() };
+    comments.push(c);
+    return c;
+  }
+
+  private find(id: number) { return tickets.find(t =&gt; t.id === id) ?? (() =&gt; { throw new NotFoundException(`Тикет ${id} не найден`); })(); }
+}
+
+// server/src/tickets/tickets.controller.ts
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { TicketsService } from './tickets.service';
+import { AuthGuard } from '../auth/auth.guard';
+
+@Controller('tickets')
+export class TicketsController {
+  constructor(private tickets: TicketsService) {}
+  @Get()                       list(@Query() q) { return this.tickets.list(q); }
+  @Get(':id')                  get(@Param('id', ParseIntPipe) id: number) { return this.tickets.get(id); }
+  @Get(':id/comments')         comments(@Param('id', ParseIntPipe) id: number) { return this.tickets.comments(id); }
+  @Get(':id/history')          history(@Param('id', ParseIntPipe) id: number) { return this.tickets.history(id); }
+  @UseGuards(AuthGuard) @Post()                 create(@Body() dto, @Req() req) { return this.tickets.create(dto, req.user); }
+  @UseGuards(AuthGuard) @Patch(':id')           update(@Param('id', ParseIntPipe) id: number, @Body() patch, @Req() req) { return this.tickets.update(id, patch, req.user); }
+  @UseGuards(AuthGuard) @Post(':id/comments')   comment(@Param('id', ParseIntPipe) id: number, @Body() b: { body: string }, @Req() req) { return this.tickets.addComment(id, b.body, req.user); }
+}
+
+// server/src/tickets/tickets.module.ts
+import { Module } from '@nestjs/common';
+import { TicketsController } from './tickets.controller';
+import { TicketsService } from './tickets.service';
+import { AuthModule } from '../auth/auth.module';
+import { EventsModule } from '../events/events.module';
+
+@Module({ imports: [AuthModule, EventsModule], controllers: [TicketsController], providers: [TicketsService] })
+export class TicketsModule {}</code></pre>
+<pre><code>docker compose up -d
+curl -s "localhost:3000/api/tickets?status=open" | jq '.total'
+curl -s -X POST localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{"email":"anna@helpdesk.test","password":"secret"}' | jq
+curl -s -X PATCH localhost:3000/api/tickets/1 -H 'Content-Type: application/json' -d '{"status":"in_progress"}'    # 401 без токена</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>5
+{ "token": "t-1-…", "user": { "id": 1, "email": "anna@helpdesk.test", "name": "Анна", "role": "agent" } }
+{"message":"Требуется вход","error":"Unauthorized","statusCode":401}</pre><p>Чтение открыто, изменения — по токену. <code>localhost:5173</code> показывает пустую страницу без ошибок в консоли.</p></div>
+<div class="why"><b>Зачем:</b> Бэкенд — не предмет лабы, но он должен быть <i>настоящим</i>: задержка, 401/404, история изменений, WebSocket-событие при каждом изменении. Без этого не на чем показать loading-состояния, обработку ошибок, guard'ы роутера и живые обновления. API нарочно маленький: 8 эндпоинтов, вы их выучите за час.</div>
+</div></div>
+<div class="step" id="step-1-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-3"></label><span class="num">Шаг 1.3</span>Песочница реактивности: ref, reactive, computed, watch, nextTick — <span class="file">views/PlaygroundView.vue</span><a class="anchor" href="#step-1-3">#</a></span><div class="step-body">
+<p>Один файл, шесть мини-экспериментов. Читайте комментарии — они и есть теория.</p><pre><code>&lt;!-- web/src/views/PlaygroundView.vue --&gt;
+&lt;script setup&gt;
+import { ref, reactive, computed, watch, nextTick } from 'vue'
+
+// ── 1. ref vs let ────────────────────────────────────────────────────────────
+let plain = 0                                  // обычная переменная: Vue про неё не знает
+const count = ref(0)                           // реактивная: чтение/запись .value отслеживаются
+function incBoth() { plain++; count.value++ }  // шаблон обновит только count
+
+// ── 2. computed: производное значение, кэшируется ────────────────────────────
+const double = computed(() =&gt; {
+  console.log('computed double пересчитан')    // увидите в консоли: только когда count менялся
+  return count.value * 2
+})
+
+// ── 3. reactive: объект целиком, без .value ───────────────────────────────────
+const form = reactive({ title: '', priority: 'medium', urgent: false })
+const titleLength = computed(() =&gt; form.title.trim().length)
+const valid = computed(() =&gt; titleLength.value &gt;= 5)
+
+// ── 4. watch: реакция на изменение (побочный эффект) ──────────────────────────
+const log = ref([])
+watch(() =&gt; form.priority, (next, prev) =&gt; log.value.unshift(`priority: ${prev} → ${next}`))
+watch(form, () =&gt; console.log('form изменилась (deep)'), { deep: true })
+
+// ── 5. nextTick: DOM обновляется асинхронно ───────────────────────────────────
+const pEl = ref(null)                          // template ref: &lt;p ref="pEl"&gt;
+async function showBatching() {
+  count.value++
+  console.log('сразу:', pEl.value.textContent)          // старое значение
+  await nextTick()
+  console.log('после nextTick:', pEl.value.textContent) // новое
+}
+
+// ── 6. потеря реактивности ────────────────────────────────────────────────────
+const { priority } = form                      // ❌ это просто строка 'medium'; менять form.priority она не будет
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;h1&gt;Песочница реактивности&lt;/h1&gt;
+
+  &lt;section&gt;
+    &lt;button @click="incBoth"&gt;plain++ и count++&lt;/button&gt;
+    &lt;p ref="pEl"&gt;count = {{ count }}, double = {{ double }}, plain = {{ plain }}&lt;/p&gt;
+    &lt;button @click="showBatching"&gt;count++ и прочитать DOM (см. консоль)&lt;/button&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;input v-model.trim="form.title" placeholder="Заголовок тикета (≥ 5 символов)" /&gt;
+    &lt;select v-model="form.priority"&gt;
+      &lt;option value="low"&gt;low&lt;/option&gt;&lt;option value="medium"&gt;medium&lt;/option&gt;&lt;option value="high"&gt;high&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;label&gt;&lt;input type="checkbox" v-model="form.urgent" /&gt; срочно&lt;/label&gt;
+    &lt;p :class="{ ok: valid, bad: !valid }"&gt;{{ titleLength }} символов — {{ valid ? 'можно сохранять' : 'слишком коротко' }}&lt;/p&gt;
+    &lt;p&gt;деструктурированный priority: {{ priority }} (не меняется)&lt;/p&gt;
+    &lt;ul&gt;&lt;li v-for="(line, i) in log" :key="i"&gt;{{ line }}&lt;/li&gt;&lt;/ul&gt;
+  &lt;/section&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+section { margin: 16px 0; padding: 12px; background: #fff; border-radius: 6px; }
+.ok { color: #2f8f6b; } .bad { color: #c62828; }
+&lt;/style&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><ul><li>Кнопка «plain++ и count++»: <code>count</code> и <code>double</code> растут, <code>plain</code> в шаблоне остаётся 0 — хотя в памяти растёт. Шаблон перерисовывается только из-за <code>count</code>, а при перерисовке читает и <code>plain</code>… откройте Devtools и проверьте, что вы увидите: <code>plain</code> обновится <i>заодно</i>, но никогда — сам по себе.</li><li>В консоли «computed double пересчитан» — ровно раз на клик, не на каждое чтение <code>double</code> в шаблоне.</li><li>Смена priority → строка в логе. Ввод в title → в консоли «form изменилась (deep)», но лог не растёт.</li><li>«count++ и прочитать DOM»: <code>сразу: count = 3</code>, <code>после nextTick: count = 4</code>.</li><li>Деструктурированный <code>priority</code> навсегда «medium».</li></ul></div>
+<div class="why"><b>Зачем:</b> Это все шесть правил реактивности из раздела 3 — глазами. Особенно важен первый эксперимент: <code>plain</code> обновился «заодно» — это классическая ловушка, из-за которой нереактивная переменная <i>иногда</i> работает и обманывает. Правило: всё, что читает шаблон, — <code>ref</code>/<code>reactive</code>/<code>computed</code>, без исключений.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>watch(form, …, { deep: true })</code> срабатывает на ввод в title, а <code>watch(() =&gt; form.priority, …)</code> — нет? Что произойдёт, если убрать <code>deep: true</code> у первого? (Подсказка: для <code>reactive</code>-объекта watch глубокий по умолчанию — проверьте.)</li><li>Замените <code>computed double</code> на функцию <code>function double() { return count.value * 2 }</code> и вызывайте <code>{{ double() }}</code> в шаблоне. Что изменится в консоли и почему?</li></ul></div>
+</div></div>
+<div class="step" id="step-1-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-4"></label><span class="num">Шаг 1.4</span>Списки, фильтры, v-model, ключи — продолжение песочницы<a class="anchor" href="#step-1-4">#</a></span><div class="step-body">
+<p>Список из статичных данных, фильтр, ключи. Добавьте в ту же песочницу:</p><pre><code>&lt;script setup&gt;
+// … к предыдущему коду добавить:
+const tickets = ref([
+  { id: 1, title: 'Не работает VPN', status: 'open',        priority: 'high'   },
+  { id: 2, title: 'Принтер печатает пустые листы', status: 'open', priority: 'medium' },
+  { id: 3, title: 'Доступ к Jira', status: 'in_progress',   priority: 'low'    },
+  { id: 4, title: 'Заменить мышь', status: 'closed',        priority: 'low'    },
+])
+const filter = reactive({ status: 'all', q: '' })
+
+const visible = computed(() =&gt; tickets.value.filter(t =&gt;
+  (filter.status === 'all' || t.status === filter.status) &amp;&amp;
+  t.title.toLowerCase().includes(filter.q.toLowerCase())
+))
+
+function remove(id) { tickets.value = tickets.value.filter(t =&gt; t.id !== id) }
+function addTicket() {
+  if (!valid.value) return
+  tickets.value.unshift({ id: Date.now(), title: form.title, status: 'open', priority: form.priority })
+  form.title = ''
+}
+const useIndexKey = ref(false)                 // переключатель для эксперимента с ключами
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- … --&gt;
+  &lt;section&gt;
+    &lt;h2&gt;Тикеты ({{ visible.length }} из {{ tickets.length }})&lt;/h2&gt;
+    &lt;div class="filters"&gt;
+      &lt;select v-model="filter.status"&gt;
+        &lt;option value="all"&gt;все&lt;/option&gt;&lt;option value="open"&gt;open&lt;/option&gt;
+        &lt;option value="in_progress"&gt;in_progress&lt;/option&gt;&lt;option value="closed"&gt;closed&lt;/option&gt;
+      &lt;/select&gt;
+      &lt;input v-model="filter.q" placeholder="поиск по названию" /&gt;
+      &lt;button :disabled="!valid" @click="addTicket"&gt;Добавить из формы выше&lt;/button&gt;
+      &lt;label&gt;&lt;input type="checkbox" v-model="useIndexKey" /&gt; key по индексу (не делайте так)&lt;/label&gt;
+    &lt;/div&gt;
+
+    &lt;p v-if="visible.length === 0" class="empty"&gt;Ничего не найдено&lt;/p&gt;
+    &lt;ul v-else&gt;
+      &lt;li v-for="(t, i) in visible" :key="useIndexKey ? i : t.id" :class="['ticket', t.status, { urgent: t.priority === 'high' }]"&gt;
+        &lt;span&gt;#{{ t.id }} {{ t.title }}&lt;/span&gt;
+        &lt;input placeholder="заметка (локальное состояние DOM)" /&gt;
+        &lt;button @click="remove(t.id)"&gt;×&lt;/button&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/section&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+.ticket { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #eee; }
+.ticket.closed { opacity: .5; } .urgent span { font-weight: bold; color: #c62828; }
+.empty { color: #777; }
+&lt;/style&gt;</code></pre>
+<p>Эксперимент с ключами: напишите что-нибудь в «заметку» второго тикета, удалите первый. С <code>key=t.id</code> заметка остаётся у своего тикета. Включите «key по индексу», повторите — заметка «переехала» на другой тикет.</p><div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Фильтр и поиск работают одновременно (оба — в одном <code>computed</code>). Пустое состояние через <code>v-if/v-else</code>. Класс <code>closed</code> — через массивный синтаксис <code>:class</code>, <code>urgent</code> — через объектный. Эксперимент с ключами воспроизводится.</p></div>
+<div class="why"><b>Зачем:</b> <code>visible</code> — <code>computed</code>, а не метод и не <code>watch</code>+ref: это производное значение, и Vue пересчитает его ровно тогда, когда изменится <code>tickets</code> или <code>filter</code>. Ключ по <code>id</code> — не формальность (раздел 3, «стабильность ключей»): DOM-узел с инпутом привязан к ключу, и при ключе-индексе Vue считает, что «второй элемент остался вторым», просто поменял текст.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>remove()</code> присваивает новый массив, а <code>addTicket()</code> мутирует через <code>unshift</code>? Оба работают — в чём разница для Vue и для читателя?</li><li>Уберите <code>v-else</code> и оставьте два независимых <code>v-if</code>. Что изменилось? Когда <code>v-show</code> был бы уместнее?</li></ul></div>
+</div></div>
+<div class="step" id="step-1-5"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-5"></label><span class="num">Шаг 1.5</span>API-слой, useAsync, первый запрос с loading / error<a class="anchor" href="#step-1-5">#</a></span><div class="step-body">
+<p>Заменяем статичный массив на данные из API. Три файла: обёртка над <code>fetch</code>, модуль эндпоинтов, composable для трёх состояний загрузки.</p><pre><code>// web/src/api/http.js
+export class ApiError extends Error {
+  constructor(status, message, body) { super(message); this.status = status; this.body = body }
+}
+
+let token = null
+export function setToken(t) { token = t }                           // сессия 3 будет вызывать из auth-store
+
+export async function http(method, path, body) {
+  const res = await fetch(`/api${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  const data = res.status === 204 ? null : await res.json().catch(() =&gt; null)
+  if (!res.ok) throw new ApiError(res.status, data?.message ?? res.statusText, data)
+  return data
+}
+
+// web/src/api/tickets.js
+import { http } from './http'
+
+export const ticketsApi = {
+  list:       (params = {}) =&gt; http('GET', '/tickets?' + new URLSearchParams(Object.entries(params).filter(([, v]) =&gt; v !== '' &amp;&amp; v != null))),
+  get:        (id)          =&gt; http('GET', `/tickets/${id}`),
+  create:     (dto)         =&gt; http('POST', '/tickets', dto),
+  update:     (id, patch)   =&gt; http('PATCH', `/tickets/${id}`, patch),
+  comments:   (id)          =&gt; http('GET', `/tickets/${id}/comments`),
+  addComment: (id, body)    =&gt; http('POST', `/tickets/${id}/comments`, { body }),
+  history:    (id)          =&gt; http('GET', `/tickets/${id}/history`),
+}</code></pre>
+<pre><code>// web/src/composables/useAsync.js
+import { ref } from 'vue'
+
+/** Оборачивает async-функцию в три состояния. Каждый вызов useAsync — своё состояние. */
+export function useAsync(fn) {
+  const data = ref(null)
+  const error = ref(null)
+  const loading = ref(false)
+
+  async function run(...args) {
+    loading.value = true
+    error.value = null
+    try {
+      data.value = await fn(...args)
+      return data.value
+    } catch (e) {
+      error.value = e
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, error, loading, run }
+}</code></pre>
+<pre><code>&lt;!-- PlaygroundView.vue — заменить статичный tickets на загрузку --&gt;
+&lt;script setup&gt;
+import { ticketsApi } from '@/api/tickets'
+import { useAsync } from '@/composables/useAsync'
+
+const { data: page, error, loading, run: load } = useAsync(ticketsApi.list)
+const tickets = computed(() =&gt; page.value?.items ?? [])          // список — производное от ответа
+
+watch(() =&gt; filter.status, status =&gt; load({ status }), { immediate: true })   // immediate: первый запрос сразу
+// поиск по q оставляем клиентским — пока; в 2.2 сделаем серверный с debounce
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;section&gt;
+    &lt;h2&gt;Тикеты &lt;small v-if="loading"&gt;загрузка…&lt;/small&gt;&lt;/h2&gt;
+    &lt;p v-if="error" class="bad"&gt;Ошибка: {{ error.message }} &lt;button @click="load({ status: filter.status })"&gt;повторить&lt;/button&gt;&lt;/p&gt;
+    &lt;!-- список как в 1.4; remove()/addTicket() пока не работают с API — это сессия 3 --&gt;
+  &lt;/section&gt;
+&lt;/template&gt;</code></pre>
+<pre><code># остановите api, чтобы увидеть ошибку и кнопку «повторить»:
+docker compose stop api    # → "Ошибка: Failed to fetch" … docker compose start api</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>При смене статуса в селекте — «загрузка…» на 300 мс, потом список с сервера. При остановленном API — сообщение об ошибке и рабочая кнопка «повторить». Devtools → Components → PlaygroundView показывает <code>page</code>, <code>error</code>, <code>loading</code> как реактивные значения.</p></div>
+<div class="why"><b>Зачем:</b> <b>Слои</b> (раздел 7): компонент не знает URL, <code>ticketsApi</code> не знает про заголовки и ошибки, <code>http</code> не знает про тикеты. <b>Composable</b>: <code>useAsync</code> — первая вынесенная логика; через сессию у вас будет пять таких. Заметьте <code>data: page</code> — переименование при деструктуризации, потому что <code>useAsync</code> возвращает обобщённые имена. <code>watch(..., { immediate: true })</code> — идиома «загрузить сразу и перезагружать при изменении» вместо <code>onMounted(load)</code> + отдельного <code>watch</code>.</div>
+<details class="deep"><summary>🔬 Под капотом: почему useAsync и бросает, и сохраняет ошибку</summary><div class="deep-body">
+
+<p><code>error.value = e</code> — чтобы шаблон показал сообщение. <code>throw e</code> — чтобы вызывающий код (например, форма) мог отреагировать по-своему: не закрывать модалку, откатить оптимистичное изменение. Если бы composable глотал ошибку, форма узнавала бы о ней только через <code>watch(error)</code> — неудобно. Если бы только бросал — каждому компоненту пришлось бы ловить и класть в свой <code>ref</code>. Делает обе вещи — стандартная форма для таких хелперов.</p>
+<p><code>URLSearchParams</code> с фильтром пустых значений — чтобы <code>?q=&amp;status=all</code> не улетало на сервер. Мелочь, но именно такие мелочи живут в API-слое, а не в компонентах.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что произойдёт, если быстро переключить селект три раза, а ответы придут в другом порядке? Как защититься? (Подсказка: счётчик запросов в <code>useAsync</code>, игнорировать устаревшие ответы.)</li><li>Почему <code>tickets</code> стал <code>computed</code> от <code>page</code>, а не отдельным <code>ref</code>, который заполняется в <code>watch</code>?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 1 → ПЕРЕД СЕССИЕЙ 2</span><ul>
+<li>✅ <code>git add -A && git commit -m "session 1: stand, api, playground"</code></li>
+<li>📝 Ответы 1.3–1.5 в <span class="file">docs/vue-notes.md</span>.</li>
+<li>📖 Почитать: <a href="https://vuejs.org/guide/components/props.html" target="_blank">Props</a>, <a href="https://vuejs.org/guide/components/events.html" target="_blank">Events</a>, <a href="https://vuejs.org/guide/components/slots.html" target="_blank">Slots</a> — по 10 минут.</li>
+</ul></div>
+<div class="session-banner" id="session-2">Сессия <a href="#session-2" style="color:#fff;text-decoration:none">2</a> — Компоненты: props, emits, v-model, слоты, Teleport, provide/inject, жизненный цикл <span>~3 часа</span></div>
+<div class="step" id="step-2-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-1"></label><span class="num">Шаг 2.1</span>StatusBadge, TicketCard, TicketList: props, emits, слот пустого состояния<a class="anchor" href="#step-2-1">#</a></span><div class="step-body">
+<p>Разбираем песочницу на компоненты. Правило разбиения: <b>презентационные</b> компоненты получают всё через props и ничего не знают об API; <b>контейнер</b> (view) загружает данные и раздаёт.</p><pre><code>&lt;!-- web/src/components/ui/StatusBadge.vue --&gt;
+&lt;script setup&gt;
+const props = defineProps({
+  status: { type: String, required: true, validator: s =&gt; ['open', 'in_progress', 'resolved', 'closed'].includes(s) },
+})
+const labels = { open: 'открыт', in_progress: 'в работе', resolved: 'решён', closed: 'закрыт' }
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;span :class="['badge', status]"&gt;{{ labels[status] }}&lt;/span&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+.badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #eee; }
+.open { background: #e3f2fd; } .in_progress { background: #fff8e1; } .resolved { background: #e8f5e9; } .closed { background: #eceff1; color: #777; }
+&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/ticket/TicketCard.vue --&gt;
+&lt;script setup&gt;
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+
+const props = defineProps({
+  ticket:   { type: Object, required: true },
+  selected: { type: Boolean, default: false },
+})
+const emit = defineEmits(['select', 'status-change'])
+
+const STATUSES = ['open', 'in_progress', 'resolved', 'closed']
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;article class="card" :class="{ selected, urgent: ticket.priority === 'high' }" @click="emit('select', ticket.id)"&gt;
+    &lt;header&gt;
+      &lt;span class="id"&gt;#{{ ticket.id }}&lt;/span&gt;
+      &lt;h3&gt;{{ ticket.title }}&lt;/h3&gt;
+      &lt;StatusBadge :status="ticket.status" /&gt;
+    &lt;/header&gt;
+    &lt;p class="meta"&gt;{{ ticket.priority }} · {{ ticket.tags.join(', ') || 'без тегов' }}&lt;/p&gt;
+    &lt;!-- .stop: клик по select не должен «выбирать» карточку --&gt;
+    &lt;select :value="ticket.status" @click.stop @change="emit('status-change', ticket.id, $event.target.value)"&gt;
+      &lt;option v-for="s in STATUSES" :key="s" :value="s"&gt;{{ s }}&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/article&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 14px; margin: 8px 0; cursor: pointer; }
+.card.selected { border-color: #2f8f6b; box-shadow: 0 0 0 2px #bfe3d3; }
+.card.urgent h3 { color: #c62828; }
+header { display: flex; gap: 10px; align-items: center; } h3 { margin: 0; flex: 1; font-size: 15px; }
+.id, .meta { color: #777; font-size: 12px; }
+&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/ticket/TicketList.vue --&gt;
+&lt;script setup&gt;
+import TicketCard from './TicketCard.vue'
+
+defineProps({
+  tickets:    { type: Array, required: true },
+  selectedId: { type: Number, default: null },
+})
+const emit = defineEmits(['select', 'status-change'])
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;slot v-if="tickets.length === 0" name="empty"&gt;        &lt;!-- родитель может заменить пустое состояние --&gt;
+      &lt;p class="empty"&gt;Ничего не найдено&lt;/p&gt;
+    &lt;/slot&gt;
+    &lt;TicketCard
+      v-for="t in tickets" :key="t.id"
+      :ticket="t" :selected="t.id === selectedId"
+      @select="emit('select', $event)"
+      @status-change="(id, status) =&gt; emit('status-change', id, status)"
+    /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;.empty { color: #777; padding: 24px; text-align: center; }&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/views/TicketsListView.vue — контейнер; App.vue теперь рендерит его вместо PlaygroundView --&gt;
+&lt;script setup&gt;
+import { ref, reactive, computed, watch } from 'vue'
+import { ticketsApi } from '@/api/tickets'
+import { useAsync } from '@/composables/useAsync'
+import TicketList from '@/components/ticket/TicketList.vue'
+
+const filter = reactive({ status: 'all', q: '' })
+const selectedId = ref(null)
+
+const { data: page, error, loading, run: load } = useAsync(ticketsApi.list)
+const tickets = computed(() =&gt; page.value?.items ?? [])
+watch(() =&gt; filter.status, status =&gt; load({ status }), { immediate: true })
+
+function onStatusChange(id, status) {
+  console.log('status-change', id, status)                 // сессия 3: сюда придёт store.changeStatus
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;h1&gt;Тикеты &lt;small v-if="loading"&gt;загрузка…&lt;/small&gt;&lt;/h1&gt;
+  &lt;select v-model="filter.status"&gt;
+    &lt;option value="all"&gt;все&lt;/option&gt;&lt;option value="open"&gt;open&lt;/option&gt;
+    &lt;option value="in_progress"&gt;in_progress&lt;/option&gt;&lt;option value="resolved"&gt;resolved&lt;/option&gt;&lt;option value="closed"&gt;closed&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;p v-if="error" class="bad"&gt;{{ error.message }}&lt;/p&gt;
+
+  &lt;TicketList :tickets="tickets" :selected-id="selectedId" @select="selectedId = $event" @status-change="onStatusChange"&gt;
+    &lt;template #empty&gt;&lt;p&gt;По фильтру «{{ filter.status }}» тикетов нет 🎉&lt;/p&gt;&lt;/template&gt;
+  &lt;/TicketList&gt;
+&lt;/template&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Тот же список, но из трёх компонентов. Клик по карточке — выделение (state у контейнера, вниз — prop <code>selected</code>, вверх — событие <code>select</code>). Смена статуса в селекте карточки — в консоли <code>status-change 1 in_progress</code>, карточка при этом <b>не выделяется</b> (<code>@click.stop</code>). Пустое состояние из слота: выберите статус, по которому нет тикетов. Devtools: у <code>TicketCard</code> видны props и события в таймлайне.</p></div>
+<div class="why"><b>Зачем:</b> <b>One-way data flow.</b> Выбранный тикет — состояние <i>контейнера</i>; карточка получает <code>selected</code> как prop и никогда его не меняет — только сообщает «меня кликнули». Попробуйте в <code>TicketCard</code> написать <code>props.selected = true</code>: Vue выдаст warning, и родитель ничего не узнает. <b>Валидатор props</b> — контракт компонента: неправильный статус даст warning в консоли на этапе разработки. <b>Слот <code>empty</code> с дефолтом</b>: список решает <i>когда</i> показать пустое состояние, родитель — <i>что</i>. <b>Kebab-case</b>: в шаблоне <code>:selected-id</code> и <code>@status-change</code>, в скрипте <code>selectedId</code> и <code>'status-change'</code> — Vue конвертирует props, события пишутся как объявлены.</div>
+<details class="deep"><summary>🔬 Под капотом: $event и стрелочная функция в обработчике; почему emit дважды</summary><div class="deep-body">
+
+<p><code>@select="selectedId = $event"</code> — для события с одним аргументом <code>$event</code> и есть он. Для события с двумя (<code>status-change(id, status)</code>) <code>$event</code> — только первый, поэтому в <code>TicketList</code> — стрелка <code>(id, status) =&gt; emit(...)</code>. <code>TicketList</code> «пробрасывает» событие карточки наверх — это нормально для одного уровня; если пробрасывать через три, значит, состояние живёт слишком высоко или пора в Pinia (раздел 4.1).</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>STATUSES</code> и <code>labels</code> — обычные константы, а не <code>ref</code>? Когда бы понадобилось сделать их реактивными?</li><li><code>TicketList</code> не имеет собственного состояния вообще. Это хорошо или плохо? Что бы вы в него положили, будь у него право на состояние?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-2"></label><span class="num">Шаг 2.2</span>defineModel: BaseInput, BaseSelect, FilterBar; useDebounce и серверный поиск<a class="anchor" href="#step-2-2">#</a></span><div class="step-body">
+<p>Фильтр — отдельный компонент, который «редактирует» два значения родителя. Это <code>defineModel</code>: по одному на значение. Поиск — серверный, с задержкой ввода.</p><pre><code>// web/src/composables/useDebounce.js
+import { ref, watch } from 'vue'
+
+/** Возвращает ref, который повторяет source с задержкой. */
+export function useDebounce(source, ms = 300) {
+  const debounced = ref(source.value)
+  let timer
+  watch(source, v =&gt; {
+    clearTimeout(timer)
+    timer = setTimeout(() =&gt; { debounced.value = v }, ms)
+  })
+  return debounced
+}</code></pre>
+<pre><code>&lt;!-- web/src/components/ui/BaseInput.vue --&gt;
+&lt;script setup&gt;
+const model = defineModel({ type: String, default: '' })      // = prop modelValue + emit update:modelValue
+defineProps({ label: { type: String, default: '' }, placeholder: { type: String, default: '' } })
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;label class="field"&gt;
+    &lt;span v-if="label"&gt;{{ label }}&lt;/span&gt;
+    &lt;input :value="model" @input="model = $event.target.value" :placeholder="placeholder" v-bind="$attrs" /&gt;
+  &lt;/label&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;.field { display: inline-flex; flex-direction: column; gap: 2px; font-size: 13px; } input { padding: 6px 8px; }&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/ui/BaseSelect.vue --&gt;
+&lt;script setup&gt;
+const model = defineModel({ type: String, required: true })
+defineProps({
+  label:   { type: String, default: '' },
+  options: { type: Array, required: true },    // [{ value, label }]
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;label class="field"&gt;
+    &lt;span v-if="label"&gt;{{ label }}&lt;/span&gt;
+    &lt;select v-model="model"&gt;                    &lt;!-- v-model на нативном select внутри — можно, model это ref --&gt;
+      &lt;option v-for="o in options" :key="o.value" :value="o.value"&gt;{{ o.label }}&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/label&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/ticket/FilterBar.vue --&gt;
+&lt;script setup&gt;
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+
+const status = defineModel('status', { type: String, default: 'all' })      // именованные модели: v-model:status
+const q      = defineModel('q',      { type: String, default: '' })          //                    v-model:q
+
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'все' }, { value: 'open', label: 'открытые' }, { value: 'in_progress', label: 'в работе' },
+  { value: 'resolved', label: 'решённые' }, { value: 'closed', label: 'закрытые' },
+]
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div class="bar"&gt;
+    &lt;BaseSelect v-model="status" label="Статус" :options="STATUS_OPTIONS" /&gt;
+    &lt;BaseInput v-model="q" label="Поиск" placeholder="название или тег" /&gt;
+    &lt;button v-if="status !== 'all' || q" @click="status = 'all'; q = ''"&gt;сбросить&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;.bar { display: flex; gap: 12px; align-items: flex-end; margin: 12px 0; }&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- TicketsListView.vue — заменить select на FilterBar, добавить серверный поиск с debounce --&gt;
+&lt;script setup&gt;
+import FilterBar from '@/components/ticket/FilterBar.vue'
+import { useDebounce } from '@/composables/useDebounce'
+
+const filter = reactive({ status: 'all', q: '' })
+const debouncedQ = useDebounce(computed(() =&gt; filter.q), 400)
+
+watch([() =&gt; filter.status, debouncedQ], ([status, q]) =&gt; load({ status, q }), { immediate: true })
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;FilterBar v-model:status="filter.status" v-model:q="filter.q" /&gt;
+  &lt;!-- … --&gt;
+&lt;/template&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Ввод «vpn» в поиск: запрос уходит один раз, через 400 мс после последнего символа (Network в Devtools). Смена статуса — сразу. «Сбросить» появляется, когда есть что сбрасывать, и меняет оба значения — у родителя, через две модели.</p></div>
+<div class="why"><b>Зачем:</b> <b><code>defineModel</code></b> — компонент как «редактор» значения родителя: <code>status = 'all'</code> внутри <code>FilterBar</code> обновляет <code>filter.status</code> снаружи. Под капотом — prop + emit, но писать это руками больше не нужно. <b>Именованные модели</b> — когда значений несколько. <b><code>v-bind="$attrs"</code></b> в <code>BaseInput</code>: всё, что не объявлено как prop (<code>type</code>, <code>autofocus</code>, <code>@keyup</code>), проваливается на <code>&lt;input&gt;</code> — так базовые компоненты остаются прозрачными обёртками. <b><code>useDebounce</code></b> принимает ref/computed, возвращает ref — composable как функция от реактивного значения к реактивному значению; <code>watch</code> с массивом источников — «перезагрузить, если изменилось любое».</div>
+<details class="deep"><summary>🔬 Под капотом: $attrs и inheritAttrs: куда попадают «лишние» атрибуты</summary><div class="deep-body">
+
+<p>По умолчанию неизвестные атрибуты ложатся на <i>корневой</i> элемент компонента. У <code>BaseInput</code> корень — <code>&lt;label&gt;</code>, а нужен <code>&lt;input&gt;</code>. Поэтому <code>v-bind="$attrs"</code> на инпуте — и <code>defineOptions({ inheritAttrs: false })</code>, чтобы они не дублировались на label. Добавьте эту строку в <code>&lt;script setup&gt;</code> и проверьте в Elements, что <code>placeholder</code> оказался в одном месте. Это то же, что «прозрачная обёртка» в ООП: базовый компонент не должен перечислять все возможные атрибуты инпута.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>useDebounce</code> получает <code>computed(() =&gt; filter.q)</code>, а не <code>filter.q</code> напрямую?</li><li>Введите текст и сразу смените статус. Сколько запросов уйдёт и с какими параметрами? Есть ли гонка (вопрос из 1.5)?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-3"></label><span class="num">Шаг 2.3</span>BaseModal: слоты, Teleport, lifecycle, template refs; тосты через provide/inject<a class="anchor" href="#step-2-3">#</a></span><div class="step-body">
+<p>Клик по карточке открывает модалку с подробностями. Модалка — универсальная: слоты для содержимого, Teleport в <code>body</code>, закрытие по Escape, фокус на кнопке. И тосты — через <code>provide/inject</code>, чтобы любая форма на любой глубине могла показать уведомление.</p><pre><code>&lt;!-- web/src/components/ui/BaseModal.vue --&gt;
+&lt;script setup&gt;
+import { onMounted, onUnmounted, useTemplateRef } from 'vue'
+
+const emit = defineEmits(['close'])
+const closeBtn = useTemplateRef('closeBtn')          // ref="closeBtn" в шаблоне
+
+function onKey(e) { if (e.key === 'Escape') emit('close') }
+onMounted(() =&gt; { document.addEventListener('keydown', onKey); closeBtn.value?.focus() })
+onUnmounted(() =&gt; document.removeEventListener('keydown', onKey))   // ❗ отписка — иначе утечка и «призрачные» Escape
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;Teleport to="body"&gt;                                  &lt;!-- в конец body: поверх всего, вне overflow/z-index родителей --&gt;
+    &lt;div class="backdrop" @click.self="emit('close')"&gt;   &lt;!-- .self: только клик по фону, не по содержимому --&gt;
+      &lt;div class="modal" role="dialog" aria-modal="true"&gt;
+        &lt;header&gt;
+          &lt;h2&gt;&lt;slot name="title"&gt;Окно&lt;/slot&gt;&lt;/h2&gt;
+          &lt;button ref="closeBtn" class="x" @click="emit('close')" aria-label="Закрыть"&gt;×&lt;/button&gt;
+        &lt;/header&gt;
+        &lt;div class="body"&gt;&lt;slot /&gt;&lt;/div&gt;
+        &lt;footer v-if="$slots.actions"&gt;&lt;slot name="actions" :close="() =&gt; emit('close')" /&gt;&lt;/footer&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/Teleport&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: grid; place-items: center; }
+.modal { background: #fff; border-radius: 10px; min-width: 420px; max-width: 90vw; padding: 16px 20px; }
+header { display: flex; align-items: center; } h2 { flex: 1; margin: 0; font-size: 18px; }
+.x { border: none; background: none; font-size: 22px; }
+footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+&lt;/style&gt;</code></pre>
+<pre><code>// web/src/composables/useToast.js — provide/inject в паре функций, чтобы ключ не расползался строкой по проекту
+import { inject, provide, ref } from 'vue'
+
+const KEY = Symbol('toast')
+
+export function provideToast() {
+  const toasts = ref([])
+  function toast(text, kind = 'info') {
+    const id = Date.now() + Math.random()
+    toasts.value.push({ id, text, kind })
+    setTimeout(() =&gt; { toasts.value = toasts.value.filter(t =&gt; t.id !== id) }, 3000)
+  }
+  provide(KEY, toast)
+  return toasts
+}
+
+export function useToast() {
+  const toast = inject(KEY)
+  if (!toast) throw new Error('useToast: вызовите provideToast() в предке (App.vue)')
+  return toast
+}</code></pre>
+<pre><code>&lt;!-- web/src/components/layout/ToastHost.vue --&gt;
+&lt;script setup&gt;
+defineProps({ toasts: { type: Array, required: true } })
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;Teleport to="body"&gt;
+    &lt;div class="toasts"&gt;
+      &lt;div v-for="t in toasts" :key="t.id" :class="['toast', t.kind]"&gt;{{ t.text }}&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/Teleport&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;
+.toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: #333; color: #fff; padding: 8px 14px; border-radius: 6px; } .toast.error { background: #c62828; } .toast.success { background: #2f8f6b; }
+&lt;/style&gt;
+
+&lt;!-- App.vue --&gt;
+&lt;script setup&gt;
+import TicketsListView from './views/TicketsListView.vue'
+import ToastHost from './components/layout/ToastHost.vue'
+import { provideToast } from './composables/useToast'
+const toasts = provideToast()                     // здесь — provide; во всех потомках доступен useToast()
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;main&gt;&lt;TicketsListView /&gt;&lt;/main&gt;
+  &lt;ToastHost :toasts="toasts" /&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>&lt;!-- TicketsListView.vue — открыть модалку по выбору, тост при смене статуса --&gt;
+&lt;script setup&gt;
+import BaseModal from '@/components/ui/BaseModal.vue'
+import { useToast } from '@/composables/useToast'
+const toast = useToast()
+
+const selected = computed(() =&gt; tickets.value.find(t =&gt; t.id === selectedId.value) ?? null)
+function onStatusChange(id, status) { toast(`#${id} → ${status} (пока только тост; сохранение — в сессии 3)`) }
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;!-- … --&gt;
+  &lt;BaseModal v-if="selected" @close="selectedId = null"&gt;
+    &lt;template #title&gt;#{{ selected.id }} {{ selected.title }}&lt;/template&gt;
+    &lt;p&gt;{{ selected.description }}&lt;/p&gt;
+    &lt;p&gt;&lt;StatusBadge :status="selected.status" /&gt; · {{ selected.priority }} · от {{ selected.reporter }}&lt;/p&gt;
+    &lt;template #actions="{ close }"&gt;
+      &lt;button @click="close"&gt;Закрыть&lt;/button&gt;
+    &lt;/template&gt;
+  &lt;/BaseModal&gt;
+&lt;/template&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Клик по карточке — модалка поверх всего (в Elements она в конце <code>body</code>, а не внутри <code>#app</code>), фокус на «×», Escape и клик по фону закрывают, клик по содержимому — нет. Смена статуса в селекте — тост внизу справа, исчезает через 3 с. <code>v-if="selected"</code> — модалка монтируется при открытии и размонтируется при закрытии, поэтому <code>onMounted/onUnmounted</code> срабатывают каждый раз (добавьте <code>console.log</code> и убедитесь).</p></div>
+<div class="why"><b>Зачем:</b> <b>Слоты</b> — модалка не знает содержимого; scoped-слот <code>actions</code> отдаёт наверх <code>close</code>, чтобы кнопка родителя могла закрыть окно, не зная про emit. <b>Teleport</b> — решает проблему <code>z-index/overflow</code> раз и навсегда. <b>Lifecycle</b> — глобальный слушатель клавиатуры ставится в <code>onMounted</code> и <i>обязательно</i> снимается в <code>onUnmounted</code>; закомментируйте отписку, откройте-закройте модалку пять раз и нажмите Escape — увидите пять событий (и утечку). <b>provide/inject через пару функций</b>: ключ — <code>Symbol</code> в модуле, потребитель зовёт <code>useToast()</code> и получает понятную ошибку, если provide забыли. Тосты — «инфраструктурная» зависимость поддерева, не бизнес-состояние; в сессии 3 сравним с вариантом на Pinia.</div>
+<details class="deep"><summary>🔬 Под капотом: useTemplateRef vs ref(null), и что такое $slots</summary><div class="deep-body">
+
+<p>В Vue 3.5 <code>useTemplateRef('name')</code> — явный способ получить элемент по <code>ref="name"</code>; старый способ — <code>const closeBtn = ref(null)</code> с тем же именем, работает до сих пор, но связь «по совпадению имени» неочевидна. <code>$slots.actions</code> в шаблоне — проверка «передал ли родитель этот слот», чтобы не рендерить пустой <code>&lt;footer&gt;</code>. <code>defineExpose({ focus })</code> — если родителю нужно позвать метод модалки через template ref; по умолчанию у <code>&lt;script setup&gt;</code> наружу не торчит ничего — инкапсуляция.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему тосты — <code>provide/inject</code>, а не prop <code>:toast="toast"</code> через все уровни? А почему не глобальная переменная в модуле?</li><li>Модалка через <code>v-if</code> монтируется каждый раз. Что изменится с <code>v-show</code>? Что сломается в lifecycle-логике?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-4"></label><span class="num">Шаг 2.4</span>Жизненный цикл в composable: useNow и RelativeTime<a class="anchor" href="#step-2-4">#</a></span><div class="step-body">
+<p>Маленький компонент с таймером, чтобы закрепить жизненный цикл и вынесение логики: «обновлено 5 минут назад», тикающее само.</p><pre><code>// web/src/composables/useNow.js
+import { ref, onMounted, onUnmounted } from 'vue'
+
+/** Реактивное «сейчас», обновляется раз в interval мс, пока компонент жив. */
+export function useNow(interval = 30_000) {
+  const now = ref(Date.now())
+  let timer
+  onMounted(() =&gt; { timer = setInterval(() =&gt; { now.value = Date.now() }, interval) })   // хуки внутри composable —
+  onUnmounted(() =&gt; clearInterval(timer))                                                //  привязаны к компоненту, который его вызвал
+  return now
+}</code></pre>
+<pre><code>&lt;!-- web/src/components/ui/RelativeTime.vue --&gt;
+&lt;script setup&gt;
+import { computed } from 'vue'
+import { useNow } from '@/composables/useNow'
+
+const props = defineProps({ date: { type: String, required: true } })
+const now = useNow(10_000)
+
+const text = computed(() =&gt; {
+  const diff = Math.round((now.value - new Date(props.date)) / 1000)
+  if (diff &lt; 60) return 'только что'
+  if (diff &lt; 3600) return `${Math.floor(diff / 60)} мин назад`
+  if (diff &lt; 86400) return `${Math.floor(diff / 3600)} ч назад`
+  return `${Math.floor(diff / 86400)} дн назад`
+})
+&lt;/script&gt;
+
+&lt;template&gt;&lt;time :datetime="date" :title="new Date(date).toLocaleString()"&gt;{{ text }}&lt;/time&gt;&lt;/template&gt;</code></pre>
+<pre><code>&lt;!-- TicketCard.vue — добавить в .meta --&gt;
+&lt;p class="meta"&gt;{{ ticket.priority }} · {{ ticket.tags.join(', ') || 'без тегов' }} · обновлён &lt;RelativeTime :date="ticket.updatedAt" /&gt;&lt;/p&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>На карточках — «12 дн назад» и т. п. Через Devtools → Components видно, что каждая <code>RelativeTime</code> держит свой <code>now</code>. Смените фильтр так, чтобы карточки исчезли: таймеры остановились (проверьте <code>console.log</code> в <code>onUnmounted</code>). Вернули — новые таймеры.</p></div>
+<div class="why"><b>Зачем:</b> <code>useNow</code> регистрирует <code>onMounted/onUnmounted</code> <i>внутри composable</i> — Vue привязывает их к компоненту, из чьего <code>setup</code> composable вызван. Так логика «таймер, который умирает вместе с компонентом» становится одной строкой в любом компоненте. Это и есть смысл composables: не «функции-хелперы», а <b>переносимые куски жизненного цикла</b>. <code>props.date</code> читается внутри <code>computed</code> — поэтому пересчёт и при тике <code>now</code>, и при смене даты.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>12 карточек — 12 таймеров. Как сделать один общий <code>now</code> на всё приложение, не теряя отписку? (Подсказка: модульный singleton со счётчиком подписчиков, или store.)</li><li>Что будет, если вызвать <code>useNow()</code> не в <code>setup</code>, а внутри обработчика клика? Прочитайте warning, который выдаст Vue.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 2 → ПЕРЕД СЕССИЕЙ 3</span><ul>
+<li>✅ <code>git commit -am "session 2: components"</code></li>
+<li>📝 Ответы 2.1–2.4.</li>
+<li>📖 Почитать: <a href="https://pinia.vuejs.org/core-concepts/" target="_blank">Pinia: Defining a Store</a> (setup stores) и <a href="https://pinia.vuejs.org/core-concepts/plugins.html" target="_blank">Plugins</a>.</li>
+</ul></div>
+<div class="session-banner" id="session-3">Сессия <a href="#session-3" style="color:#fff;text-decoration:none">3</a> — Pinia: кэш тикетов, авторизация, оптимистичные обновления, persist <span>~3 часа</span></div>
+<div class="step" id="step-3-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-1"></label><span class="num">Шаг 3.1</span>ticketsStore: state, getters, actions, storeToRefs, защита от гонки<a class="anchor" href="#step-3-1">#</a></span><div class="step-body">
+<p>Список тикетов скоро понадобится трём страницам (список, канбан, деталь) и WebSocket-обработчику. Значит, радиус состояния — всё приложение → store.</p><pre><code>// web/src/stores/tickets.js
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { ticketsApi } from '@/api/tickets'
+
+export const useTicketsStore = defineStore('tickets', () =&gt; {
+  // ── state ──
+  const items   = ref([])
+  const total   = ref(0)
+  const loading = ref(false)
+  const error   = ref(null)
+
+  // ── getters ──
+  const byId   = computed(() =&gt; Object.fromEntries(items.value.map(t =&gt; [t.id, t])))
+  const byStatus = computed(() =&gt; {
+    const groups = { open: [], in_progress: [], resolved: [], closed: [] }
+    for (const t of items.value) groups[t.status]?.push(t)
+    return groups
+  })
+
+  // ── actions ──
+  let requestNo = 0                                     // защита от гонки (вопрос 1.5)
+  async function load(params = {}) {
+    const no = ++requestNo
+    loading.value = true; error.value = null
+    try {
+      const page = await ticketsApi.list({ limit: 50, ...params })
+      if (no !== requestNo) return                       // пришёл устаревший ответ — игнорируем
+      items.value = page.items; total.value = page.total
+    } catch (e) {
+      if (no === requestNo) error.value = e
+    } finally {
+      if (no === requestNo) loading.value = false
+    }
+  }
+
+  async function fetchOne(id) {
+    const t = await ticketsApi.get(id)
+    upsert(t)
+    return t
+  }
+
+  function upsert(ticket) {
+    const i = items.value.findIndex(t =&gt; t.id === ticket.id)
+    i === -1 ? items.value.push(ticket) : items.value.splice(i, 1, ticket)
+  }
+
+  return { items, total, loading, error, byId, byStatus, load, fetchOne, upsert }
+})</code></pre>
+<pre><code>&lt;!-- TicketsListView.vue — контейнер теперь читает store --&gt;
+&lt;script setup&gt;
+import { storeToRefs } from 'pinia'
+import { useTicketsStore } from '@/stores/tickets'
+
+const store = useTicketsStore()
+const { items: tickets, loading, error } = storeToRefs(store)     // реактивные ссылки на state/getters
+// useAsync и page — удалить; load теперь у store:
+watch([() =&gt; filter.status, debouncedQ], ([status, q]) =&gt; store.load({ status, q }), { immediate: true })
+&lt;/script&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Поведение прежнее. Devtools → Pinia: store <code>tickets</code> с <code>items</code>, <code>byStatus</code>, историей вызовов <code>load</code>. Быстро переключите статус три раза — в Network три запроса, в списке результат последнего (защита от гонки).</p></div>
+<div class="why"><b>Зачем:</b> Setup-store пишется как composable — те же <code>ref/computed</code>, — но Pinia создаёт его <b>один раз на приложение</b> и регистрирует в Devtools. <b><code>storeToRefs</code></b> — обязательный шаг при деструктуризации: <code>const { items } = store</code> вернёт «сырое» значение и оторвёт его от store (та же ловушка, что с <code>reactive</code> в 1.3). Actions деструктурировать можно напрямую — это функции. <b>Getter <code>byStatus</code></b> считается один раз для всех потребителей и пересчитывается только при изменении <code>items</code>; в сессии 5 его будет читать канбан.</div>
+<details class="deep"><summary>🔬 Под капотом: requestNo — почему счётчик, а не AbortController</summary><div class="deep-body">
+
+<p><code>AbortController</code> отменяет сам HTTP-запрос — экономит трафик и правильно с точки зрения браузера, но требует прокинуть <code>signal</code> через <code>http</code> и <code>ticketsApi</code>. Счётчик — минимальная защита на уровне «принять ли ответ»: запрос дойдёт, ответ выбросим. Для лабы достаточно; в проде — оба, и в <code>useAsync</code> та же логика (домашнее задание из 1.5). Обратите внимание: <code>requestNo</code> — <code>let</code>, не <code>ref</code>: его никто не рендерит, реактивность не нужна.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li><code>byId</code> пересоздаёт объект при каждом изменении <code>items</code>. Для 50 тикетов это ничто; для 50 000? Какая структура данных в state была бы лучше?</li><li>Почему <code>load</code> ловит ошибку и кладёт в <code>error</code>, а <code>fetchOne</code> — пробрасывает? Кто их вызывает?</li></ul></div>
+</div></div>
+<div class="step" id="step-3-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-2"></label><span class="num">Шаг 3.2</span>authStore + persist-плагин + LoginForm + AppHeader<a class="anchor" href="#step-3-2">#</a></span><div class="step-body">
+<p>Авторизация: токен и пользователь — состояние всего приложения, должно переживать F5. Store + маленький persist-плагин + форма входа (пока в шапке; страница <code>/login</code> появится с роутером).</p><pre><code>// web/src/stores/plugins/persist.js — Pinia-плагин: 12 строк вместо зависимости
+export function persistPlugin({ store, options }) {
+  const keys = options.persist                                  // defineStore('auth', fn, { persist: ['token', 'user'] })
+  if (!keys) return
+  const storageKey = `pinia:${store.$id}`
+  const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null')
+  if (saved) store.$patch(saved)                                // восстановить при создании store
+  store.$subscribe((_mutation, state) =&gt; {                       // сохранять при каждом изменении
+    localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(keys.map(k =&gt; [k, state[k]]))))
+  })
+}
+
+// web/src/main.js
+import { persistPlugin } from './stores/plugins/persist'
+const pinia = createPinia()
+pinia.use(persistPlugin)
+createApp(App).use(pinia).use(router).mount('#app')</code></pre>
+<pre><code>// web/src/api/auth.js
+import { http } from './http'
+export const authApi = {
+  login: (email, password) =&gt; http('POST', '/auth/login', { email, password }),
+  me:    ()                =&gt; http('GET', '/auth/me'),
+}
+
+// web/src/stores/auth.js
+import { defineStore } from 'pinia'
+import { ref, computed, watch } from 'vue'
+import { authApi } from '@/api/auth'
+import { setToken } from '@/api/http'
+
+export const useAuthStore = defineStore('auth', () =&gt; {
+  const token = ref(null)
+  const user  = ref(null)
+
+  const isAuthenticated = computed(() =&gt; !!token.value)
+  const isAdmin = computed(() =&gt; user.value?.role === 'admin')
+
+  watch(token, t =&gt; setToken(t), { immediate: true })          // http-слой узнаёт о токене; immediate — и о восстановленном из localStorage
+
+  async function login(email, password) {
+    const res = await authApi.login(email, password)          // ApiError 401 — пусть ловит форма
+    token.value = res.token
+    user.value  = res.user
+  }
+  function logout() { token.value = null; user.value = null }
+
+  return { token, user, isAuthenticated, isAdmin, login, logout }
+}, { persist: ['token', 'user'] })                              // третий аргумент defineStore — options для плагинов</code></pre>
+<pre><code>&lt;!-- web/src/components/layout/LoginForm.vue --&gt;
+&lt;script setup&gt;
+import { reactive, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import BaseInput from '@/components/ui/BaseInput.vue'
+
+const auth = useAuthStore()
+const form = reactive({ email: 'anna@helpdesk.test', password: 'secret' })
+const error = ref(null)
+const busy = ref(false)
+
+async function submit() {
+  busy.value = true; error.value = null
+  try { await auth.login(form.email, form.password) }
+  catch (e) { error.value = e.status === 401 ? 'Неверный e-mail или пароль' : e.message }
+  finally { busy.value = false }
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;form class="login" @submit.prevent="submit"&gt;               &lt;!-- .prevent: без перезагрузки страницы --&gt;
+    &lt;BaseInput v-model="form.email" placeholder="e-mail" type="email" autocomplete="username" /&gt;
+    &lt;BaseInput v-model="form.password" placeholder="пароль" type="password" autocomplete="current-password" /&gt;
+    &lt;button :disabled="busy"&gt;{{ busy ? '…' : 'Войти' }}&lt;/button&gt;
+    &lt;span v-if="error" class="bad"&gt;{{ error }}&lt;/span&gt;
+  &lt;/form&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;.login { display: flex; gap: 8px; align-items: center; }&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/layout/AppHeader.vue --&gt;
+&lt;script setup&gt;
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
+import LoginForm from './LoginForm.vue'
+const auth = useAuthStore()
+const { user, isAuthenticated } = storeToRefs(auth)
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;header class="top"&gt;
+    &lt;strong&gt;Helpdesk&lt;/strong&gt;
+    &lt;div class="spacer" /&gt;
+    &lt;template v-if="isAuthenticated"&gt;
+      &lt;span&gt;{{ user.name }} &lt;small&gt;({{ user.role }})&lt;/small&gt;&lt;/span&gt;
+      &lt;button @click="auth.logout()"&gt;Выйти&lt;/button&gt;
+    &lt;/template&gt;
+    &lt;LoginForm v-else /&gt;
+  &lt;/header&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;.top { display: flex; gap: 12px; align-items: center; padding: 10px 24px; background: #fff; border-bottom: 1px solid #e0e0e0; } .spacer { flex: 1; }&lt;/style&gt;
+
+&lt;!-- App.vue: добавить &lt;AppHeader /&gt; над &lt;main&gt; --&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Вход с неверным паролем — «Неверный e-mail или пароль», кнопка не залипает. С верным — имя и роль в шапке. F5 — вы всё ещё вошли (localStorage → <code>pinia:auth</code>). «Выйти» — форма снова. В Network у любого запроса после входа — заголовок <code>Authorization: Bearer t-1-…</code>.</p></div>
+<div class="why"><b>Зачем:</b> <b>Store с побочным эффектом наружу:</b> <code>watch(token, setToken)</code> — единственное место, где auth-store общается с http-слоем; форма и остальные store о токене не знают. <b><code>immediate: true</code></b> критичен: после F5 токен восстанавливается плагином ещё до первого запроса, и http-слой должен его получить сразу. <b>Плагин Pinia</b> — расширение всех store через <code>$patch</code> (массовое изменение) и <code>$subscribe</code> (реакция на любое изменение). Двенадцать строк заменяют зависимость и показывают, что Pinia — не магия. <b>Ошибка входа — состояние формы</b>, не store: её радиус — один компонент.</div>
+<details class="deep"><summary>🔬 Под капотом: что и почему не стоит persist'ить</summary><div class="deep-body">
+
+<p>Токен и пользователь — да: без них после F5 пришлось бы логиниться заново. Кэш тикетов — нет: он устареет за минуту, а первый рендер покажет старые данные, потом дёрнется. Фильтры списка — не в localStorage, а в URL (сессия 4): ссылкой делятся, а localStorage — нет. Правило: persist — для того, что дорого получить заново <i>и</i> редко меняется.</p>
+<p>Токен в localStorage доступен любому скрипту на странице (XSS). В проде обычно httpOnly-cookie; для лабы и для понимания механики — так.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>После логина <code>user</code> хранится в state. Что будет, если админ поменяет роль пользователя на сервере, пока тот залогинен? Где бы вы вызывали <code>authApi.me()</code> для проверки?</li><li><code>logout()</code> чистит state, а токен на сервере остаётся валидным. Что нужно добавить в API и в store?</li></ul></div>
+</div></div>
+<div class="step" id="step-3-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-3"></label><span class="num">Шаг 3.3</span>Оптимистичная смена статуса с откатом; ошибки → тосты<a class="anchor" href="#step-3-3">#</a></span><div class="step-body">
+<p>Смена статуса из карточки — теперь по-настоящему: показать сразу, отправить, откатить при ошибке.</p><pre><code>// stores/tickets.js — добавить action
+async function changeStatus(id, status) {
+  const before = byId.value[id]
+  if (!before || before.status === status) return
+  upsert({ ...before, status, updatedAt: new Date().toISOString() })   // 1. оптимистично: UI обновился сразу
+  try {
+    const saved = await ticketsApi.update(id, { status })             // 2. сервер
+    upsert(saved)                                                     // 3. серверная версия (history, updatedAt)
+  } catch (e) {
+    upsert(before)                                                    // 4. откат
+    throw e                                                           //    и пусть вызывающий покажет тост
+  }
+}
+// не забыть добавить changeStatus в return</code></pre>
+<pre><code>&lt;!-- TicketsListView.vue --&gt;
+&lt;script setup&gt;
+import { ApiError } from '@/api/http'
+
+async function onStatusChange(id, status) {
+  try {
+    await store.changeStatus(id, status)
+    toast(`#${id}: статус → ${status}`, 'success')
+  } catch (e) {
+    const msg = e instanceof ApiError &amp;&amp; e.status === 401 ? 'Войдите, чтобы менять тикеты' : e.message
+    toast(msg, 'error')
+  }
+}
+&lt;/script&gt;</code></pre>
+<pre><code># сценарии:
+# 1) не залогинены → выбрать статус в карточке: бейдж меняется мгновенно и через 300 мс возвращается, тост «Войдите…»
+# 2) войти как anna (agent) → open → in_progress: бейдж меняется, тост success, в Network PATCH 200
+# 3) anna → closed: откат + тост «Закрывать тикеты может только admin»
+# 4) войти как boris (admin) → closed: успех</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Все четыре сценария. В Devtools → Pinia → timeline видно два <code>upsert</code> на успешную смену (оптимистичный и серверный) и два на неудачную (оптимистичный и откат).</p></div>
+<div class="why"><b>Зачем:</b> <b>Оптимистичное обновление — обязанность store</b>, а не компонента: откат должен быть виден всем, кто читает <code>items</code> (список, канбан, деталь), и только store знает, как выглядела «предыдущая версия». Компонент решает только, что <i>сказать</i> пользователю. Заметьте разделение: store бросает исключение (данные), контейнер переводит его в тост (UI). Это та же граница, что и в ООП-лабе: доменная ошибка ↔ HTTP-ответ.</div>
+<details class="deep"><summary>🔬 Под капотом: 4 вместо 403 — намеренная неаккуратность бэкенда</summary><div class="deep-body">
+
+<p>Nest возвращает <code>NotFoundException</code> на «только admin может закрывать» — так написано в сервисе нарочно. Правильный код — 403. Исправьте на бэкенде (<code>ForbiddenException</code>) и убедитесь, что фронтенду всё равно: он показывает <code>e.message</code>. Но если бы фронт различал 403 («нет прав») и 404 («тикета нет») — например, для редиректа, — плохой код ответа сломал бы логику. Мораль: коды ответа — часть контракта API, и фронтенд на них опирается.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Между оптимистичным <code>upsert</code> и ответом сервера пришло WebSocket-событие с другой версией тикета (сессия 5). Что победит и почему? Это баг?</li><li>Стоит ли делать оптимистичным создание тикета (у него ещё нет <code>id</code>)? Какие есть варианты?</li></ul></div>
+</div></div>
+<div class="step" id="step-3-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-4"></label><span class="num">Шаг 3.4</span>uiStore для тостов; сравнение ref / provide-inject / store<a class="anchor" href="#step-3-4">#</a></span><div class="step-body">
+<p>Тосты сейчас — <code>provide/inject</code>. Store вызвать тост не может: <code>inject</code> работает только внутри компонентов. Переносим в Pinia и сравниваем три механизма.</p><pre><code>// web/src/stores/ui.js
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+
+export const useUiStore = defineStore('ui', () =&gt; {
+  const toasts = ref([])
+  function toast(text, kind = 'info', ttl = 3000) {
+    const id = Date.now() + Math.random()
+    toasts.value.push({ id, text, kind })
+    setTimeout(() =&gt; dismiss(id), ttl)
+  }
+  function dismiss(id) { toasts.value = toasts.value.filter(t =&gt; t.id !== id) }
+  return { toasts, toast, dismiss }
+})
+
+// composables/useToast.js — оставить как тонкую обёртку, чтобы компоненты не менять:
+import { useUiStore } from '@/stores/ui'
+export function useToast() { return useUiStore().toast }
+// provideToast() и вызов в App.vue — удалить; ToastHost читает store сам:
+
+&lt;!-- ToastHost.vue --&gt;
+&lt;script setup&gt;
+import { storeToRefs } from 'pinia'
+import { useUiStore } from '@/stores/ui'
+const ui = useUiStore()
+const { toasts } = storeToRefs(ui)
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;Teleport to="body"&gt;
+    &lt;div class="toasts"&gt;
+      &lt;div v-for="t in toasts" :key="t.id" :class="['toast', t.kind]" @click="ui.dismiss(t.id)"&gt;{{ t.text }}&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/Teleport&gt;
+&lt;/template&gt;</code></pre>
+<p>Теперь store может сам сообщать об ошибках — например, <code>load()</code> в <code>ticketsStore</code>:</p><pre><code>// stores/tickets.js — внутри load, в catch:
+import { useUiStore } from './ui'
+// …
+} catch (e) {
+  if (no === requestNo) { error.value = e; useUiStore().toast(`Не удалось загрузить тикеты: ${e.message}`, 'error') }   // store → store
+}</code></pre>
+<table>
+<tr><th></th><th>Локальный ref + props/emits</th><th>provide / inject</th><th>Pinia store</th></tr>
+<tr><td>Радиус</td><td>компонент и прямые дети</td><td>поддерево</td><td>всё приложение</td></tr>
+<tr><td>Доступен вне компонентов (store, router guard)</td><td>нет</td><td>нет</td><td>да</td></tr>
+<tr><td>Devtools</td><td>props/state компонента</td><td>—</td><td>state, getters, timeline actions</td></tr>
+<tr><td>Кто меняет</td><td>владелец</td><td>кто угодно, у кого есть inject</td><td>actions</td></tr>
+<tr><td>Тестировать</td><td>mount с props</td><td>mount с <code>global.provide</code></td><td><code>setActivePinia</code></td></tr>
+<tr><td>Когда</td><td>по умолчанию</td><td>инфраструктура поддерева: тема, i18n, форма-контекст</td><td>пользователь, кэши, уведомления, всё «межстраничное»</td></tr>
+</table>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Тосты работают как раньше, плюс кликом закрываются, плюс появляются при ошибке загрузки (остановите <code>api</code>). В Devtools → Pinia три store: <code>tickets</code>, <code>auth</code>, <code>ui</code>.</p></div>
+<div class="why"><b>Зачем:</b> Мы сделали одно и то же двумя способами не зря: выбор между ними — это вопрос «кому нужно» из раздела 4.1, и лучше один раз упереться в ограничение <code>inject</code> вне компонентов, чем запомнить правило. <code>useToast()</code> остался как фасад — компоненты не заметили переезда: та же идея, что интерфейс в ООП.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Store <code>tickets</code> импортирует store <code>ui</code>. Может ли <code>ui</code> импортировать <code>tickets</code>? Что произойдёт?</li><li>Стоит ли <code>ticketsStore.load</code> вообще показывать тост, или это должен делать компонент? Аргументы за оба варианта.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 3 → ПЕРЕД СЕССИЕЙ 4</span><ul>
+<li>✅ <code>git commit -am "session 3: pinia stores, auth, optimistic updates"</code></li>
+<li>📝 Ответы 3.1–3.4.</li>
+<li>📖 Почитать: <a href="https://router.vuejs.org/guide/essentials/dynamic-matching.html" target="_blank">Router: Dynamic Route Matching</a>, <a href="https://router.vuejs.org/guide/essentials/nested-routes.html" target="_blank">Nested Routes</a>, <a href="https://router.vuejs.org/guide/advanced/navigation-guards.html" target="_blank">Navigation Guards</a>.</li>
+</ul></div>
+<div class="session-banner" id="session-4">Сессия <a href="#session-4" style="color:#fff;text-decoration:none">4</a> — Vue Router: страницы, guards, вложенные маршруты, фильтры в URL <span>~3 часа</span></div>
+<div class="step" id="step-4-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-1"></label><span class="num">Шаг 4.1</span>Маршруты, lazy loading, RouterLink, LoginView с редиректом, 404<a class="anchor" href="#step-4-1">#</a></span><div class="step-body">
+<pre><code>// web/src/router/index.js
+import { createRouter, createWebHistory } from 'vue-router'
+import TicketsListView from '@/views/TicketsListView.vue'          // стартовая страница — статический импорт (в основном чанке)
+
+export const routes = [                                           // export — понадобится в тестах (5.3)
+  { path: '/',        redirect: '/tickets' },
+  { path: '/login',   name: 'login',   component: () =&gt; import('@/views/LoginView.vue'),   meta: { guest: true } },
+  { path: '/tickets', name: 'tickets', component: TicketsListView },
+  { path: '/board',   name: 'board',   component: () =&gt; import('@/views/BoardView.vue') },                          // сессия 5
+  { path: '/tickets/new', name: 'ticket-new', component: () =&gt; import('@/views/NewTicketView.vue'), meta: { requiresAuth: true } },
+  {
+    path: '/tickets/:id(\\d+)',                                    // только цифры; /tickets/new не попадёт сюда
+    component: () =&gt; import('@/views/TicketDetailsView.vue'),
+    props: route =&gt; ({ id: Number(route.params.id) }),            // params → props, уже числом
+    children: [                                                   // вложенные: рендерятся в &lt;RouterView&gt; внутри TicketDetailsView
+      { path: '',         name: 'ticket',          component: () =&gt; import('@/views/ticket/DetailsTab.vue') },
+      { path: 'comments', name: 'ticket-comments', component: () =&gt; import('@/views/ticket/CommentsTab.vue') },
+      { path: 'history',  name: 'ticket-history',  component: () =&gt; import('@/views/ticket/HistoryTab.vue') },
+    ],
+  },
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () =&gt; import('@/views/NotFoundView.vue') },
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior: (to, from, saved) =&gt; saved ?? { top: 0 },     // «назад» возвращает скролл; новая страница — наверх
+})
+
+export default router</code></pre>
+<pre><code>&lt;!-- App.vue --&gt;
+&lt;script setup&gt;
+import AppHeader from './components/layout/AppHeader.vue'
+import ToastHost from './components/layout/ToastHost.vue'
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;AppHeader /&gt;
+  &lt;main&gt;&lt;RouterView /&gt;&lt;/main&gt;
+  &lt;ToastHost /&gt;
+&lt;/template&gt;
+
+&lt;!-- AppHeader.vue — навигация; LoginForm заменяем ссылкой на /login --&gt;
+&lt;template&gt;
+  &lt;header class="top"&gt;
+    &lt;RouterLink to="/tickets" class="brand"&gt;Helpdesk&lt;/RouterLink&gt;
+    &lt;nav&gt;
+      &lt;RouterLink :to="{ name: 'tickets' }"&gt;Список&lt;/RouterLink&gt;
+      &lt;RouterLink :to="{ name: 'board' }"&gt;Канбан&lt;/RouterLink&gt;
+      &lt;RouterLink v-if="isAuthenticated" :to="{ name: 'ticket-new' }"&gt;+ Новый&lt;/RouterLink&gt;
+    &lt;/nav&gt;
+    &lt;div class="spacer" /&gt;
+    &lt;template v-if="isAuthenticated"&gt;
+      &lt;span&gt;{{ user.name }} &lt;small&gt;({{ user.role }})&lt;/small&gt;&lt;/span&gt;
+      &lt;button @click="auth.logout()"&gt;Выйти&lt;/button&gt;
+    &lt;/template&gt;
+    &lt;RouterLink v-else :to="{ name: 'login' }"&gt;Войти&lt;/RouterLink&gt;
+  &lt;/header&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;
+nav a { margin-right: 12px; color: #555; text-decoration: none; }
+nav a.router-link-active { color: #2f8f6b; font-weight: bold; }       /* Router сам вешает класс на активную ссылку */
+&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/views/LoginView.vue --&gt;
+&lt;script setup&gt;
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import LoginForm from '@/components/layout/LoginForm.vue'
+
+const route = useRoute(), router = useRouter()
+const auth = useAuthStore()
+// LoginForm после успешного входа эмитит 'success' (добавьте emit('success') после auth.login в submit)
+function onSuccess() { router.replace(route.query.redirect ?? { name: 'tickets' }) }   // вернуть туда, откуда пришли
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;h1&gt;Вход&lt;/h1&gt;
+  &lt;LoginForm @success="onSuccess" /&gt;
+  &lt;p class="small"&gt;anna@helpdesk.test / boris@helpdesk.test, пароль secret&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;!-- web/src/views/NotFoundView.vue --&gt;
+&lt;template&gt;
+  &lt;h1&gt;404&lt;/h1&gt;
+  &lt;p&gt;Такой страницы нет. &lt;RouterLink to="/tickets"&gt;К тикетам&lt;/RouterLink&gt;&lt;/p&gt;
+&lt;/template&gt;</code></pre>
+<pre><code># заглушки, чтобы всё собралось (наполним в 4.3 и сессии 5):
+for f in BoardView NewTicketView TicketDetailsView; do printf '&lt;template&gt;&lt;h1&gt;%s&lt;/h1&gt;&lt;/template&gt;\n' $f &gt; web/src/views/$f.vue; done
+mkdir -p web/src/views/ticket &amp;&amp; for f in DetailsTab CommentsTab HistoryTab; do printf '&lt;template&gt;&lt;p&gt;%s&lt;/p&gt;&lt;/template&gt;\n' $f &gt; web/src/views/ticket/$f.vue; done</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Навигация по ссылкам без перезагрузки, активная ссылка подсвечена. <code>/tickets/abc</code> → 404 (регулярка в пути), <code>/whatever</code> → 404. В Network при первом заходе на «Канбан» подгружается отдельный чанк <code>BoardView-….js</code> — lazy loading. Кнопка «назад» браузера работает.</p></div>
+<div class="why"><b>Зачем:</b> <b>Маршрут — это состояние</b>: какая страница, с каким id, с какими фильтрами (4.4). <b>Lazy import</b> — каждая страница в своём чанке, стартовый бандл не растёт с числом страниц; стартовую страницу оставляем статической, чтобы не было двойной загрузки. <b><code>props: route =&gt; ({...})</code></b> — страница получает <code>id</code> как обычный prop, числом, и не знает про <code>useRoute()</code>: её можно смонтировать в тесте с <code>props: { id: 1 }</code>. <b>Именованные маршруты</b> в <code>RouterLink</code> и <code>router.push</code> — переименование пути не ломает ссылки.</div>
+<details class="deep"><summary>🔬 Под капотом: RouterLink активные классы, replace vs push</summary><div class="deep-body">
+
+<p><code>router-link-active</code> — путь «включает» ссылку (<code>/tickets</code> активна на <code>/tickets/5</code>), <code>router-link-exact-active</code> — точное совпадение. <code>router.push</code> добавляет запись в историю (кнопка «назад» вернёт), <code>router.replace</code> заменяет текущую — для редиректа после логина (не нужно возвращаться на форму входа) и для синхронизации фильтров (4.4).</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>/tickets/new</code> объявлен <i>до</i> <code>/tickets/:id</code> и почему регулярка <code>(\d+)</code> всё равно нужна?</li><li>Что вернёт <code>useRoute().params.id</code> — строку или число? Зачем тогда <code>props: route =&gt; …</code>?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-2"></label><span class="num">Шаг 4.2</span>Navigation guards: requiresAuth, роли, redirect после входа<a class="anchor" href="#step-4-2">#</a></span><div class="step-body">
+<pre><code>// router/index.js — глобальный guard; вынесен в функцию, чтобы в тестах ставить его на свой router
+import { useAuthStore } from '@/stores/auth'
+
+export function installGuards(router) {
+  router.beforeEach(to =&gt; {
+    const auth = useAuthStore()                    // store доступен здесь — pinia уже установлена в main.js до первой навигации
+    if (to.meta.requiresAuth &amp;&amp; !auth.isAuthenticated) {
+      return { name: 'login', query: { redirect: to.fullPath } }   // вернуть объект = перенаправить
+    }
+    if (to.meta.requiresRole &amp;&amp; auth.user?.role !== to.meta.requiresRole) {
+      return { name: 'tickets' }
+    }
+    if (to.meta.guest &amp;&amp; auth.isAuthenticated) {
+      return { name: 'tickets' }                                  // залогиненному на /login нечего делать
+    }
+    // ничего не вернуть = пропустить
+  })
+}
+installGuards(router)</code></pre>
+<pre><code># проверка:
+# 1) выйти → /tickets/new → редирект на /login?redirect=/tickets/new → войти → снова на /tickets/new
+# 2) войти → /login → сразу /tickets
+# 3) добавьте к маршруту board: meta: { requiresAuth: true, requiresRole: 'admin' } → anna → /board → /tickets; boris → проходит</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Все три сценария. Guard — одно место для всех правил доступа; страницы о них не знают. Подсказка на будущее: в проде guard проверяет только <i>наличие</i> токена, а настоящую проверку делает API (401/403) — фронтенд-guard это удобство, не безопасность.</p></div>
+<div class="why"><b>Зачем:</b> <b><code>beforeEach</code></b> — перехват любой навигации до рендера. Возврат маршрута = редирект, <code>false</code> = отмена, ничего = пропуск. <b><code>meta</code></b> — декларативные правила у маршрута вместо <code>if</code> в каждой странице. <b>Store в guard</b>: вот зачем Pinia была раньше роутера — <code>useAuthStore()</code> вызывается вне компонента, и это работает, потому что <code>app.use(pinia)</code> уже произошёл.</div>
+<details class="deep"><summary>🔬 Под капотом: порядок use(pinia) и use(router), и guard'ы на уровне маршрута</summary><div class="deep-body">
+
+<p>Если вызвать <code>useAuthStore()</code> на верхнем уровне модуля <code>router/index.js</code> (а не внутри <code>beforeEach</code>), будет ошибка «getActivePinia was called with no active Pinia» — модуль исполняется при импорте, до <code>app.use(pinia)</code>. Внутри колбэка — уже после. То же правило для composables и store в любом не-компонентном коде: вызывать лениво.</p>
+<p>Кроме глобального <code>beforeEach</code> есть <code>beforeEnter</code> у маршрута (только для него) и <code>onBeforeRouteLeave</code> в компоненте («есть несохранённые изменения, уйти?» — используйте в 4.3 для формы комментария).</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что произойдёт при F5 на <code>/tickets/new</code> залогиненным пользователем? Проследите: persist-плагин → <code>token</code> → guard. В каком порядке?</li><li><code>redirect</code> в query — открытый редирект? Что проверить перед <code>router.replace(route.query.redirect)</code>?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-3"></label><span class="num">Шаг 4.3</span>Страница тикета с вложенными вкладками; форма создания; onBeforeRouteLeave<a class="anchor" href="#step-4-3">#</a></span><div class="step-body">
+<p>Страница тикета с вкладками — вложенные маршруты. Родитель загружает тикет и отдаёт его вкладкам через <code>provide</code> (или props на <code>RouterView</code>). Плюс страница создания.</p><pre><code>&lt;!-- web/src/views/TicketDetailsView.vue --&gt;
+&lt;script setup&gt;
+import { computed, provide, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTicketsStore } from '@/stores/tickets'
+import { useAsync } from '@/composables/useAsync'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+
+const props = defineProps({ id: { type: Number, required: true } })
+const store = useTicketsStore()
+const { byId } = storeToRefs(store)
+
+const { loading, error, run: load } = useAsync(id =&gt; store.fetchOne(id))
+const ticket = computed(() =&gt; byId.value[props.id] ?? null)     // источник правды — store: обновится и от WebSocket
+
+watch(() =&gt; props.id, load, { immediate: true })                 // ❗ переход /tickets/1 → /tickets/2 переиспользует компонент; следим за id
+provide('ticket', ticket)                                        // вкладкам — реактивный computed
+
+const tabs = [
+  { name: 'ticket',          label: 'Описание' },
+  { name: 'ticket-comments', label: 'Комментарии' },
+  { name: 'ticket-history',  label: 'История' },
+]
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;p v-if="loading &amp;&amp; !ticket"&gt;Загрузка…&lt;/p&gt;
+  &lt;p v-else-if="error" class="bad"&gt;{{ error.status === 404 ? 'Тикет не найден' : error.message }}&lt;/p&gt;
+  &lt;template v-else-if="ticket"&gt;
+    &lt;h1&gt;#{{ ticket.id }} {{ ticket.title }} &lt;StatusBadge :status="ticket.status" /&gt;&lt;/h1&gt;
+    &lt;nav class="tabs"&gt;
+      &lt;RouterLink v-for="t in tabs" :key="t.name" :to="{ name: t.name, params: { id } }" exact-active-class="active"&gt;{{ t.label }}&lt;/RouterLink&gt;
+    &lt;/nav&gt;
+    &lt;RouterView /&gt;                                               &lt;!-- сюда рендерится вкладка --&gt;
+  &lt;/template&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;.tabs a { margin-right: 16px; padding-bottom: 4px; color: #555; text-decoration: none; } .tabs a.active { border-bottom: 2px solid #2f8f6b; color: #1c1c1c; }&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/views/ticket/DetailsTab.vue --&gt;
+&lt;script setup&gt;
+import { inject } from 'vue'
+import RelativeTime from '@/components/ui/RelativeTime.vue'
+const ticket = inject('ticket')
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;p&gt;{{ ticket.description }}&lt;/p&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;Приоритет&lt;/dt&gt;&lt;dd&gt;{{ ticket.priority }}&lt;/dd&gt;
+    &lt;dt&gt;Теги&lt;/dt&gt;&lt;dd&gt;{{ ticket.tags.join(', ') || '—' }}&lt;/dd&gt;
+    &lt;dt&gt;Автор&lt;/dt&gt;&lt;dd&gt;{{ ticket.reporter }}&lt;/dd&gt;
+    &lt;dt&gt;Обновлён&lt;/dt&gt;&lt;dd&gt;&lt;RelativeTime :date="ticket.updatedAt" /&gt;&lt;/dd&gt;
+  &lt;/dl&gt;
+&lt;/template&gt;
+
+&lt;!-- web/src/views/ticket/CommentsTab.vue --&gt;
+&lt;script setup&gt;
+import { inject, ref, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
+import { ticketsApi } from '@/api/tickets'
+import { useAsync } from '@/composables/useAsync'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/composables/useToast'
+import RelativeTime from '@/components/ui/RelativeTime.vue'
+
+const ticket = inject('ticket')
+const auth = useAuthStore()
+const toast = useToast()
+
+const { data: comments, loading, run: load } = useAsync(id =&gt; ticketsApi.comments(id))
+watch(() =&gt; ticket.value.id, load, { immediate: true })
+
+const draft = ref('')
+const sending = ref(false)
+async function send() {
+  if (!draft.value.trim()) return
+  sending.value = true
+  try {
+    const c = await ticketsApi.addComment(ticket.value.id, draft.value.trim())
+    comments.value.push(c)                                   // локальный список: комментарии не в store — радиус страницы
+    draft.value = ''
+  } catch (e) { toast(e.message, 'error') }
+  finally { sending.value = false }
+}
+
+onBeforeRouteLeave(() =&gt; draft.value.trim() === '' || confirm('Комментарий не отправлен. Уйти?'))   // false = остаться
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;p v-if="loading"&gt;Загрузка…&lt;/p&gt;
+  &lt;ul v-else class="comments"&gt;
+    &lt;li v-for="c in comments" :key="c.id"&gt;&lt;b&gt;#{{ c.authorId }}&lt;/b&gt; · &lt;RelativeTime :date="c.createdAt" /&gt;&lt;p&gt;{{ c.body }}&lt;/p&gt;&lt;/li&gt;
+    &lt;li v-if="comments?.length === 0" class="small"&gt;Комментариев пока нет&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;form v-if="auth.isAuthenticated" @submit.prevent="send"&gt;
+    &lt;textarea v-model="draft" rows="3" placeholder="Комментарий…" /&gt;
+    &lt;button :disabled="sending || !draft.trim()"&gt;Отправить&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;p v-else class="small"&gt;&lt;RouterLink :to="{ name: 'login', query: { redirect: $route.fullPath } }"&gt;Войдите&lt;/RouterLink&gt;, чтобы комментировать&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;!-- HistoryTab.vue — по аналогии с комментариями: ticketsApi.history(id), список «field: from → to, RelativeTime» --&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/ticket/TicketForm.vue — форма создания; ничего не знает об API: emit('submit', dto) --&gt;
+&lt;script setup&gt;
+import { reactive, computed } from 'vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+
+const emit = defineEmits(['submit'])
+defineProps({ busy: { type: Boolean, default: false } })
+
+const form = reactive({ title: '', description: '', priority: 'medium', tags: '' })
+const errors = computed(() =&gt; ({
+  title: form.title.trim().length &lt; 5 ? 'Минимум 5 символов' : null,
+  description: form.description.trim().length &lt; 10 ? 'Минимум 10 символов' : null,
+}))
+const valid = computed(() =&gt; Object.values(errors.value).every(e =&gt; e === null))
+
+function submit() {
+  if (!valid.value) return
+  emit('submit', { ...form, title: form.title.trim(), description: form.description.trim(),
+                   tags: form.tags.split(',').map(s =&gt; s.trim()).filter(Boolean) })
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;form class="form" @submit.prevent="submit"&gt;
+    &lt;BaseInput v-model="form.title" label="Заголовок" autofocus /&gt;&lt;small class="bad"&gt;{{ errors.title }}&lt;/small&gt;
+    &lt;label&gt;Описание&lt;textarea v-model="form.description" rows="4" /&gt;&lt;/label&gt;&lt;small class="bad"&gt;{{ errors.description }}&lt;/small&gt;
+    &lt;BaseSelect v-model="form.priority" label="Приоритет" :options="[{ value: 'low', label: 'low' }, { value: 'medium', label: 'medium' }, { value: 'high', label: 'high' }]" /&gt;
+    &lt;BaseInput v-model="form.tags" label="Теги через запятую" placeholder="network, vpn" /&gt;
+    &lt;button :disabled="!valid || busy"&gt;{{ busy ? 'Сохраняем…' : 'Создать тикет' }}&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;.form { display: grid; gap: 6px; max-width: 520px; } textarea { width: 100%; }&lt;/style&gt;
+
+&lt;!-- web/src/views/NewTicketView.vue --&gt;
+&lt;script setup&gt;
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ticketsApi } from '@/api/tickets'
+import { useTicketsStore } from '@/stores/tickets'
+import { useToast } from '@/composables/useToast'
+import TicketForm from '@/components/ticket/TicketForm.vue'
+
+const router = useRouter(), store = useTicketsStore(), toast = useToast()
+const busy = ref(false)
+
+async function create(dto) {
+  busy.value = true
+  try {
+    const t = await ticketsApi.create(dto)
+    store.upsert(t)
+    toast(`Тикет #${t.id} создан`, 'success')
+    router.push({ name: 'ticket', params: { id: t.id } })
+  } catch (e) { toast(e.message, 'error') }
+  finally { busy.value = false }
+}
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;h1&gt;Новый тикет&lt;/h1&gt;
+  &lt;TicketForm :busy="busy" @submit="create" /&gt;
+&lt;/template&gt;</code></pre>
+<pre><code>&lt;!-- TicketCard.vue — карточка ведёт на страницу: emit('select') заменяем ссылкой --&gt;
+&lt;RouterLink :to="{ name: 'ticket', params: { id: ticket.id } }" class="title"&gt;{{ ticket.title }}&lt;/RouterLink&gt;
+&lt;!-- в TicketsListView модалку с описанием можно удалить: у тикета теперь своя страница --&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Клик по названию → <code>/tickets/1</code>, вкладки переключают <code>/tickets/1/comments</code>, <code>/tickets/1/history</code> без перезагрузки родителя (тикет не перезапрашивается — проверьте в Network). Из тикета 1 по ссылке в тикет 2 (например, из «Список» → другая карточка) — <code>watch(props.id)</code> подгружает новый. Комментарий отправляется только залогиненным; начатый и не отправленный — <code>confirm</code> при уходе. Новый тикет → редирект на его страницу; <code>/tickets/999</code> → «Тикет не найден».</p></div>
+<div class="why"><b>Зачем:</b> <b>Вложенные маршруты</b> — родитель живёт, пока меняются дети: тикет загружен один раз, вкладки — лёгкие. <b><code>watch(() =&gt; props.id)</code></b> — самая частая ошибка с роутером: переход между двумя маршрутами одного компонента <i>не пересоздаёт</i> компонент, <code>onMounted</code> не сработает второй раз. <b><code>provide('ticket', computed)</code></b> — вкладки получают реактивный тикет из store: когда в сессии 5 придёт WebSocket-обновление, вкладка «Описание» обновится сама. <b>Комментарии — не в store</b>: их читает одна страница, радиус — компонент. <b><code>TicketForm</code> — презентационная</b>: валидация внутри, отправка — <code>emit</code>; та же форма подойдёт для редактирования.</div>
+<details class="deep"><summary>🔬 Под капотом: inject computed vs props на RouterView</summary><div class="deep-body">
+
+<p>Альтернатива <code>provide</code> — <code>&lt;RouterView v-slot="{ Component }"&gt;&lt;component :is="Component" :ticket="ticket" /&gt;&lt;/RouterView&gt;</code>: вкладки получают тикет как явный prop, что лучше для тестов и читаемости, но требует объявить prop в каждой вкладке. <code>provide/inject</code> короче и уместен, потому что вкладки — «части» страницы, а не переиспользуемые компоненты. Оба варианта корректны; выберите один и объясните почему — это и есть вопрос «проверь себя».</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>ticket</code> в родителе — <code>computed</code> от <code>byId</code>, а не результат <code>useAsync</code>? Что сломалось бы в сессии 5?</li><li>Замените <code>provide</code> на props через <code>RouterView v-slot</code>. Что стало лучше, что хуже?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-4"></label><span class="num">Шаг 4.4</span>useRouteQuery: фильтры в URL через writable computed<a class="anchor" href="#step-4-4">#</a></span><div class="step-body">
+<p>Фильтры списка — в URL: <code>/tickets?status=open&amp;q=vpn</code>. Синхронизация в обе стороны, вынесенная в composable.</p><pre><code>// web/src/composables/useRouteQuery.js
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+/** Реактивный объект, чьи поля читаются из route.query и пишутся в него (replace, чтобы не засорять историю). */
+export function useRouteQuery(defaults) {
+  const route = useRoute(), router = useRouter()
+  const query = {}
+  for (const key of Object.keys(defaults)) {
+    query[key] = computed({
+      get: () =&gt; route.query[key] ?? defaults[key],
+      set: v =&gt; router.replace({ query: { ...route.query, [key]: v === defaults[key] || v === '' ? undefined : v } }),   // дефолт → убрать из URL
+    })
+  }
+  return query
+}</code></pre>
+<pre><code>&lt;!-- TicketsListView.vue --&gt;
+&lt;script setup&gt;
+import { useRouteQuery } from '@/composables/useRouteQuery'
+
+const filter = useRouteQuery({ status: 'all', q: '' })          // вместо reactive({ status, q })
+const debouncedQ = useDebounce(filter.q, 400)                    // filter.q — уже computed, подходит как source
+watch([filter.status, debouncedQ], ([status, q]) =&gt; store.load({ status, q }), { immediate: true })
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;FilterBar v-model:status="filter.status.value" v-model:q="filter.q.value" /&gt;    &lt;!-- writable computed: .value и в шаблоне --&gt;
+&lt;/template&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Выбор статуса меняет URL (без новых записей в истории — «назад» ведёт на предыдущую страницу, а не на предыдущий фильтр). Ввод в поиск — <code>?q=vpn</code> появляется сразу, запрос — через 400 мс. F5 сохраняет фильтры; ссылку можно отправить коллеге. Переход в тикет и «назад» — фильтры на месте, скролл восстановлен (<code>scrollBehavior</code>).</p></div>
+<div class="why"><b>Зачем:</b> <b>Writable computed</b> (<code>computed({ get, set })</code>) — способ сделать «виртуальный ref», чьё чтение и запись ведут во внешнее состояние (URL). Компоненты работают с ним как с обычной моделью. <b>Дефолт удаляется из URL</b> — чтобы <code>/tickets</code> и <code>/tickets?status=all</code> были одним адресом. Это последний ответ на вопрос «где живёт состояние» из раздела 4.1: то, что должно переживать F5 и шариться, — в URL.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>filter.q.value</code> в шаблоне нужно писать с <code>.value</code>, хотя обычно Vue разворачивает ref сам? (Подсказка: разворачиваются только refs верхнего уровня, не вложенные в объект.)</li><li>Что произойдёт при <code>router.replace</code> с тем же query? Сработает ли <code>watch</code> ещё раз?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 4 → ПЕРЕД СЕССИЕЙ 5</span><ul>
+<li>✅ <code>git commit -am "session 4: router"</code></li>
+<li>📝 Ответы 4.1–4.4.</li>
+<li>📖 Почитать: <a href="https://vuejs.org/guide/built-ins/transition-group.html" target="_blank">TransitionGroup</a>, <a href="https://test-utils.vuejs.org/guide/" target="_blank">Vue Test Utils: Getting Started</a>, <a href="https://socket.io/docs/v4/client-api/" target="_blank">socket.io-client</a>.</li>
+</ul></div>
+<div class="session-banner" id="session-5">Сессия <a href="#session-5" style="color:#fff;text-decoration:none">5</a> — Продвинутое: WebSocket, канбан с анимацией, динамические компоненты, тесты, сборка <span>~3,5 часа</span></div>
+<div class="step" id="step-5-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-1"></label><span class="num">Шаг 5.1</span>WebSocket: useSocket, живые обновления через store<a class="anchor" href="#step-5-1">#</a></span><div class="step-body">
+<pre><code>cd web &amp;&amp; npm i socket.io-client &amp;&amp; cd ..</code></pre>
+<pre><code>// web/src/composables/useSocket.js
+import { ref, onMounted, onUnmounted } from 'vue'
+import { io } from 'socket.io-client'
+
+/** Подписка на события сокета на время жизни компонента. handlers: { 'event': fn } */
+export function useSocket(handlers) {
+  const connected = ref(false)
+  let socket
+
+  onMounted(() =&gt; {
+    socket = io({ path: '/socket.io' })                          // тот же origin → через Vite proxy (ws: true)
+    socket.on('connect',    () =&gt; { connected.value = true })
+    socket.on('disconnect', () =&gt; { connected.value = false })
+    for (const [event, fn] of Object.entries(handlers)) socket.on(event, fn)
+  })
+  onUnmounted(() =&gt; socket?.disconnect())                        // ❗ одна подписка на всё приложение — и одна отписка
+
+  return { connected }
+}</code></pre>
+<pre><code>&lt;!-- App.vue — подписываемся один раз, на корне: живёт всё время работы приложения --&gt;
+&lt;script setup&gt;
+import { useSocket } from './composables/useSocket'
+import { useTicketsStore } from './stores/tickets'
+import { useUiStore } from './stores/ui'
+
+const tickets = useTicketsStore(), ui = useUiStore()
+const { connected } = useSocket({
+  'ticket.updated': t =&gt; {
+    const known = tickets.byId[t.id]
+    tickets.upsert(t)
+    if (known &amp;&amp; known.status !== t.status) ui.toast(`#${t.id}: ${known.status} → ${t.status}`)   // чужие изменения — тостом
+  },
+})
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;AppHeader :online="connected" /&gt;       &lt;!-- в AppHeader: prop online + индикатор ● зелёный/серый --&gt;
+  …
+&lt;/template&gt;</code></pre>
+<pre><code># проверка: две вкладки браузера с /tickets. В одной войти и сменить статус тикета —
+# во второй бейдж меняется без перезагрузки и появляется тост. Открыть /tickets/1 в третьей — вкладка «Описание» тоже обновится.
+# docker compose stop api → индикатор серый; start → зелёный, socket.io переподключится сам.</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Живые обновления во всех вкладках, индикатор соединения в шапке. Заметьте, что при смене статуса из <i>своей</i> вкладки тост не дублируется: store уже применил серверную версию (<code>known.status === t.status</code>).</p></div>
+<div class="why"><b>Зачем:</b> <b>Один сокет на приложение</b>, в корневом компоненте — потому что радиус этого состояния максимальный. Подписка живёт в composable с <code>onMounted/onUnmounted</code> (2.4), обработчик — в store (3.1: <code>upsert</code> — единственная дверь для новых данных). Всё, что вы построили раньше — <code>byId</code>, <code>computed</code> в деталях, <code>byStatus</code> для канбана, — обновилось <b>без единой правки</b>: реактивность работает от источника данных, а не от того, кто их принёс. Это финальная демонстрация «UI = f(state)».</div>
+<details class="deep"><summary>🔬 Под капотом: гонка WebSocket vs оптимистичное обновление (вопрос 3.3)</summary><div class="deep-body">
+
+<p>Порядок: <code>upsert(оптимистичный)</code> → PATCH уходит → сервер обновил, разослал <code>ticket.updated</code> → <b>сокет приносит серверную версию раньше, чем вернётся ответ PATCH</b> (тот же процесс, но ответ идёт через искусственную задержку) → <code>upsert(из сокета)</code> → ответ PATCH → <code>upsert(saved)</code>. Все три версии одинаковы по статусу, поэтому UI не мигает. Проблема возникла бы, если бы откат (<code>upsert(before)</code>) пришёл после сокетного обновления другого поля — тогда откат затёр бы чужое изменение. Решение — откатывать не весь объект, а только поле; или <code>updatedAt</code>-сравнение в <code>upsert</code> (не применять версию старше текущей). Реализуйте второе — это 3 строки.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li><code>useSocket</code> вызван в <code>App.vue</code>. Что, если вызвать его ещё и в <code>BoardView</code>? Сколько соединений, сколько тостов на одно событие?</li><li>Пользователь без токена тоже получает все события. Это нормально для helpdesk? Как ограничить на стороне Nest (подсказка: <code>handleConnection</code> + токен в <code>auth</code> сокета)?</li></ul></div>
+</div></div>
+<div class="step" id="step-5-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-2"></label><span class="num">Шаг 5.2</span>Канбан: TransitionGroup, динамический компонент, defineAsyncComponent<a class="anchor" href="#step-5-2">#</a></span><div class="step-body">
+<p>Канбан: четыре колонки из getter'а <code>byStatus</code>, перемещение кнопками, анимация перестановки через <code>TransitionGroup</code>, переключение вида карточки через <code>&lt;component :is&gt;</code>, тяжёлая панель статистики — асинхронным компонентом.</p><pre><code>&lt;!-- web/src/components/ticket/TicketRow.vue — компактный вид для канбана; тот же контракт, что у TicketCard --&gt;
+&lt;script setup&gt;
+defineProps({ ticket: { type: Object, required: true } })
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;RouterLink :to="{ name: 'ticket', params: { id: ticket.id } }" class="row" :class="{ urgent: ticket.priority === 'high' }"&gt;
+    #{{ ticket.id }} {{ ticket.title }}
+  &lt;/RouterLink&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;.row { display: block; padding: 6px 8px; background: #fff; border-radius: 6px; text-decoration: none; color: inherit; font-size: 13px; } .urgent { border-left: 3px solid #c62828; }&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/components/board/KanbanColumn.vue --&gt;
+&lt;script setup&gt;
+import TicketCard from '@/components/ticket/TicketCard.vue'
+import TicketRow from '@/components/ticket/TicketRow.vue'
+
+const props = defineProps({
+  status:  { type: String, required: true },
+  tickets: { type: Array, required: true },
+  compact: { type: Boolean, default: false },
+  prev:    { type: String, default: null },        // куда «←»
+  next:    { type: String, default: null },        // куда «→»
+})
+const emit = defineEmits(['move'])
+const LABELS = { open: 'Открытые', in_progress: 'В работе', resolved: 'Решённые', closed: 'Закрытые' }
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;section class="column"&gt;
+    &lt;h2&gt;{{ LABELS[status] }} &lt;span class="count"&gt;{{ tickets.length }}&lt;/span&gt;&lt;/h2&gt;
+    &lt;TransitionGroup name="card" tag="div" class="cards"&gt;          &lt;!-- анимирует появление/исчезание/перестановку по key --&gt;
+      &lt;div v-for="t in tickets" :key="t.id" class="item"&gt;
+        &lt;component :is="compact ? TicketRow : TicketCard" :ticket="t" /&gt;     &lt;!-- динамический компонент: два вида, один контракт --&gt;
+        &lt;div class="actions"&gt;
+          &lt;button v-if="prev" @click="emit('move', t.id, prev)" title="назад"&gt;←&lt;/button&gt;
+          &lt;button v-if="next" @click="emit('move', t.id, next)" title="дальше"&gt;→&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/TransitionGroup&gt;
+  &lt;/section&gt;
+&lt;/template&gt;
+
+&lt;style scoped&gt;
+.column { background: #f0f0f3; border-radius: 8px; padding: 8px; min-width: 220px; flex: 1; }
+h2 { font-size: 14px; margin: 4px 4px 8px; } .count { color: #777; font-weight: normal; }
+.cards { display: flex; flex-direction: column; gap: 6px; min-height: 40px; }
+.item { position: relative; } .actions { display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px; }
+/* классы TransitionGroup: card-enter-*, card-leave-*, card-move */
+.card-enter-from, .card-leave-to { opacity: 0; transform: translateY(-8px); }
+.card-enter-active, .card-leave-active { transition: all .25s ease; }
+.card-move { transition: transform .3s ease; }
+.card-leave-active { position: absolute; width: 100%; }        /* уходящий элемент не должен занимать место, чтобы соседи «поехали» */
+&lt;/style&gt;</code></pre>
+<pre><code>&lt;!-- web/src/views/BoardView.vue --&gt;
+&lt;script setup&gt;
+import { ref, defineAsyncComponent, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTicketsStore } from '@/stores/tickets'
+import { useToast } from '@/composables/useToast'
+import KanbanColumn from '@/components/board/KanbanColumn.vue'
+
+const BoardStats = defineAsyncComponent(() =&gt; import('@/components/board/BoardStats.vue'))   // отдельный чанк, грузится при первом рендере
+
+const store = useTicketsStore(), toast = useToast()
+const { byStatus, loading } = storeToRefs(store)
+const ORDER = ['open', 'in_progress', 'resolved', 'closed']
+const compact = ref(true)
+const showStats = ref(false)
+
+onMounted(() =&gt; { if (store.items.length === 0) store.load() })   // если список уже загружен другой страницей — не дёргаем API
+
+async function move(id, status) {
+  try { await store.changeStatus(id, status) }
+  catch (e) { toast(e.status === 401 ? 'Войдите, чтобы двигать тикеты' : e.message, 'error') }
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div class="toolbar"&gt;
+    &lt;h1&gt;Канбан &lt;small v-if="loading"&gt;…&lt;/small&gt;&lt;/h1&gt;
+    &lt;label&gt;&lt;input type="checkbox" v-model="compact" /&gt; компактно&lt;/label&gt;
+    &lt;button @click="showStats = !showStats"&gt;{{ showStats ? 'скрыть' : 'показать' }} статистику&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;BoardStats v-if="showStats" :groups="byStatus" /&gt;
+  &lt;div class="board"&gt;
+    &lt;KanbanColumn
+      v-for="(s, i) in ORDER" :key="s"
+      :status="s" :tickets="byStatus[s]" :compact="compact"
+      :prev="ORDER[i - 1] ?? null" :next="ORDER[i + 1] ?? null"
+      @move="move"
+    /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;style scoped&gt;.toolbar { display: flex; gap: 16px; align-items: center; } .board { display: flex; gap: 12px; align-items: flex-start; }&lt;/style&gt;
+
+&lt;!-- web/src/components/board/BoardStats.vue — простая панель: по колонке — количество и доля high --&gt;
+&lt;script setup&gt;
+import { computed } from 'vue'
+const props = defineProps({ groups: { type: Object, required: true } })
+const rows = computed(() =&gt; Object.entries(props.groups).map(([status, list]) =&gt; ({
+  status, total: list.length, high: list.filter(t =&gt; t.priority === 'high').length,
+})))
+&lt;/script&gt;
+&lt;template&gt;
+  &lt;table class="stats"&gt;&lt;tr v-for="r in rows" :key="r.status"&gt;&lt;td&gt;{{ r.status }}&lt;/td&gt;&lt;td&gt;{{ r.total }}&lt;/td&gt;&lt;td&gt;high: {{ r.high }}&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/template&gt;</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Четыре колонки. «→» переносит карточку в соседнюю: она плавно исчезает из одной колонки и появляется в другой, соседи «съезжаются» (класс <code>card-move</code>). Без входа — тост и мгновенный откат (карточка возвращается с анимацией). Переключение «компактно» меняет компонент карточек на лету. «Показать статистику» — в Network появляется чанк <code>BoardStats-….js</code>. Во второй вкладке браузера карточки двигаются сами (WebSocket).</p></div>
+<div class="why"><b>Зачем:</b> <b><code>TransitionGroup</code></b> работает по <code>key</code>: Vue знает, какой DOM-узел ушёл, какой пришёл, какой переместился — и анимирует переход, не заставляя вас трогать DOM. Ещё один аргумент за стабильные ключи. <b><code>&lt;component :is&gt;</code></b> — полиморфизм в шаблоне: два компонента с одинаковым контрактом (prop <code>ticket</code>), выбор в рантайме. <b><code>defineAsyncComponent</code></b> — lazy loading не только для страниц: тяжёлое (графики, редакторы) грузится, когда понадобится. <b>Канбан не загружает данные, если они уже есть</b>: store — общий кэш между страницами, и это проявляется ровно здесь.</div>
+<details class="deep"><summary>🔬 Под капотом: KeepAlive и Suspense — два встроенных компонента, которые здесь не понадобились</summary><div class="deep-body">
+
+<p><code>&lt;KeepAlive&gt;</code> вокруг <code>&lt;RouterView&gt;</code> сохраняет состояние страниц при переключении (скролл списка, черновик формы) вместо размонтирования; хуки <code>onActivated/onDeactivated</code>. Стоит попробовать на <code>TicketsListView</code>. <code>&lt;Suspense&gt;</code> — ожидание <code>await</code> в <code>setup</code> асинхронных компонентов с общим fallback; удобно, но всё ещё помечен экспериментальным — в лабе используем явные <code>loading</code>-флаги.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>.card-leave-active { position: absolute }</code>. Что изменилось в анимации и почему?</li><li><code>byStatus[s]</code> — новый массив при каждом изменении <code>items</code>. Перерисуются ли все четыре колонки при перемещении одного тикета? Как проверить (Devtools → Performance / highlight updates)?</li></ul></div>
+</div></div>
+<div class="step" id="step-5-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-3"></label><span class="num">Шаг 5.3</span>Тесты: компонент, composable, store, router guard<a class="anchor" href="#step-5-3">#</a></span><div class="step-body">
+<p>Четыре вида тестов — по одному на каждый слой: компонент, composable, store, роутер. Всё уже настроено скаффолдом (Vitest + jsdom + Test Utils).</p><pre><code>// web/src/__tests__/TicketCard.spec.js — компонент: props → DOM, DOM → emits
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import TicketCard from '@/components/ticket/TicketCard.vue'
+
+const ticket = { id: 7, title: 'VPN не работает', status: 'open', priority: 'high', tags: ['vpn'], updatedAt: new Date().toISOString() }
+
+describe('TicketCard', () =&gt; {
+  it('рендерит заголовок, бейдж и класс urgent для high', () =&gt; {
+    const w = mount(TicketCard, { props: { ticket }, global: { stubs: ['RouterLink'] } })   // RouterLink заглушкой: роутера в тесте нет
+    expect(w.text()).toContain('VPN не работает')
+    expect(w.text()).toContain('открыт')
+    expect(w.classes()).toContain('urgent')
+  })
+
+  it('эмитит status-change с id и новым статусом', async () =&gt; {
+    const w = mount(TicketCard, { props: { ticket }, global: { stubs: ['RouterLink'] } })
+    await w.find('select').setValue('resolved')
+    expect(w.emitted('status-change')).toEqual([[7, 'resolved']])
+    expect(w.emitted('select')).toBeUndefined()            // .stop на select сработал
+  })
+})</code></pre>
+<pre><code>// web/src/__tests__/useDebounce.spec.js — composable с таймерами
+import { describe, it, expect, vi } from 'vitest'
+import { ref, nextTick } from 'vue'
+import { useDebounce } from '@/composables/useDebounce'
+
+describe('useDebounce', () =&gt; {
+  it('обновляет значение только после паузы', async () =&gt; {
+    vi.useFakeTimers()
+    const source = ref('a')
+    const d = useDebounce(source, 300)
+
+    source.value = 'ab';  await nextTick()
+    source.value = 'abc'; await nextTick()
+    expect(d.value).toBe('a')                    // ещё не прошло 300 мс
+
+    vi.advanceTimersByTime(300)
+    expect(d.value).toBe('abc')                  // один раз, последнее значение
+    vi.useRealTimers()
+  })
+})</code></pre>
+<pre><code>// web/src/__tests__/tickets.store.spec.js — store с подменённым API
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+
+vi.mock('@/api/tickets', () =&gt; ({                 // модуль API целиком заменяется на объект с vi.fn — сети нет
+  ticketsApi: { list: vi.fn(), update: vi.fn(), get: vi.fn() },
+}))
+import { ticketsApi } from '@/api/tickets'
+import { useTicketsStore } from '@/stores/tickets'
+
+describe('ticketsStore.changeStatus', () =&gt; {
+  beforeEach(() =&gt; setActivePinia(createPinia()))  // свежая Pinia на каждый тест
+
+  it('оптимистично меняет и оставляет серверную версию', async () =&gt; {
+    const store = useTicketsStore()
+    store.upsert({ id: 1, status: 'open', title: 't' })
+    ticketsApi.update.mockResolvedValue({ id: 1, status: 'in_progress', title: 't', updatedAt: 'x' })
+
+    const p = store.changeStatus(1, 'in_progress')
+    expect(store.byId[1].status).toBe('in_progress')          // до ответа сервера
+    await p
+    expect(store.byId[1].updatedAt).toBe('x')                 // серверная версия применена
+    expect(ticketsApi.update).toHaveBeenCalledWith(1, { status: 'in_progress' })
+  })
+
+  it('откатывает при ошибке и пробрасывает её', async () =&gt; {
+    const store = useTicketsStore()
+    store.upsert({ id: 1, status: 'open', title: 't' })
+    ticketsApi.update.mockRejectedValue(new Error('403'))
+
+    await expect(store.changeStatus(1, 'closed')).rejects.toThrow('403')
+    expect(store.byId[1].status).toBe('open')
+  })
+})</code></pre>
+<pre><code>// web/src/__tests__/router.guard.spec.js — guard с memory-history
+import { describe, it, expect, beforeEach } from 'vitest'
+import { createRouter, createMemoryHistory } from 'vue-router'
+import { setActivePinia, createPinia } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
+import { routes, installGuards } from '@/router'      // ❗ экспортируйте из router/index.js: export { routes, installGuards }
+
+function makeRouter() {
+  const r = createRouter({ history: createMemoryHistory(), routes })
+  installGuards(r)                                      // вынесите router.beforeEach(...) в функцию installGuards(router)
+  return r
+}
+
+describe('auth guard', () =&gt; {
+  beforeEach(() =&gt; setActivePinia(createPinia()))
+
+  it('гостя с /tickets/new отправляет на /login с redirect', async () =&gt; {
+    const r = makeRouter()
+    await r.push('/tickets/new')
+    expect(r.currentRoute.value.name).toBe('login')
+    expect(r.currentRoute.value.query.redirect).toBe('/tickets/new')
+  })
+
+  it('залогиненного пускает', async () =&gt; {
+    useAuthStore().token = 't-1-x'
+    const r = makeRouter()
+    await r.push('/tickets/new')
+    expect(r.currentRoute.value.name).toBe('ticket-new')
+  })
+})</code></pre>
+<pre><code>docker compose exec web npm run test:unit -- --run</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre> ✓ src/__tests__/TicketCard.spec.js (2)
+ ✓ src/__tests__/useDebounce.spec.js (1)
+ ✓ src/__tests__/tickets.store.spec.js (2)
+ ✓ src/__tests__/router.guard.spec.js (2)
+
+ Test Files  4 passed (4)
+      Tests  7 passed (7)</pre><p>Без браузера, без API, без базы — за секунду. Если <code>router.guard.spec</code> падает на импорте компонентов-страниц — lazy-импорты в тестах не выполняются, пока маршрут не отрендерен, так что должно пройти; если нет — замените в <code>routes</code> для теста компоненты на заглушки.</p></div>
+<div class="why"><b>Зачем:</b> Каждый слой тестируется в своих терминах. <b>Компонент</b> — «дал props, получил DOM; покликал, получил emits», без store и роутера (<code>RouterLink</code> — заглушка). <b>Composable</b> — обычная функция с реактивными значениями, таймеры — фейковые. <b>Store</b> — API подменён через <code>vi.mock</code>: проверяем оптимистичность и откат, то, что сложнее всего проверить руками. <b>Guard</b> — роутер с <code>createMemoryHistory</code>, без DOM. То, что всё это возможно, — следствие границ, которые вы проводили пять сессий: компоненты не знают про API, store не знает про компоненты, guard знает только store.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Напишите тест для <code>TicketList</code>: с пустым массивом рендерится дефолтный слот <code>empty</code>; с переданным слотом — он. (Подсказка: <code>mount(…, { slots: { empty: '…' } })</code>.)</li><li>Почему тест store не проверяет <code>load()</code>? Что в нём сложно протестировать и как бы вы это сделали (подсказка: гонка, <code>requestNo</code>)?</li></ul></div>
+</div></div>
+<div class="step" id="step-5-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-4"></label><span class="num">Шаг 5.4</span>Production-сборка, деплой за прокси, карта проекта и «до / после»<a class="anchor" href="#step-5-4">#</a></span><div class="step-body">
+<pre><code>docker compose exec web npm run build
+# vite v6 building for production...
+# dist/index.html                       0.45 kB
+# dist/assets/index-….css               3.2 kB
+# dist/assets/index-….js               95.1 kB │ gzip: 36.4 kB
+# dist/assets/BoardView-….js            4.8 kB   ← lazy-страницы отдельными чанками
+# dist/assets/BoardStats-….js           0.9 kB
+# dist/assets/TicketDetailsView-….js    …
+docker compose exec web npm run preview -- --host      # localhost:4173 — production-сборка; API-прокси там нет:</code></pre>
+<pre><code># для production нужен reverse proxy, который отдаёт dist/ и проксирует /api и /socket.io в Nest. Например, nginx:
+location /            { root /usr/share/nginx/html; try_files $uri /index.html; }    # SPA: любой путь → index.html (history mode)
+location /api/        { proxy_pass http://api:3000; }
+location /socket.io/  { proxy_pass http://api:3000; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }
+# это ровно то, что делает Traefik Lab — можно собрать в ней compose с web + api + traefik как упражнение</code></pre>
+<p>Что получилось:</p><pre>src/
+├── api/            http (fetch + ApiError + токен), tickets, auth          ← знает URL; больше никто
+├── composables/    useAsync useDebounce useNow useToast useRouteQuery useSocket   ← переносимая логика с lifecycle
+├── components/
+│   ├── ui/         BaseInput BaseSelect (defineModel) BaseModal (Teleport, слоты) StatusBadge RelativeTime
+│   ├── ticket/     TicketCard TicketRow TicketList FilterBar TicketForm     ← презентационные: props/emits, без store
+│   ├── board/      KanbanColumn (TransitionGroup, component :is) BoardStats (async)
+│   └── layout/     AppHeader LoginForm ToastHost
+├── stores/         tickets (кэш, оптимистика, гонка) auth (persist) ui (тосты) + plugins/persist
+├── router/         routes (lazy, props, nested, 404), guards (auth, роли, redirect)
+├── views/          TicketsListView BoardView NewTicketView LoginView NotFoundView
+│                   TicketDetailsView → ticket/{DetailsTab, CommentsTab, HistoryTab}   ← контейнеры: store + router
+└── __tests__/      компонент · composable · store · guard</pre>
+<table>
+<tr><th></th><th>DOM руками (раздел 1)</th><th>Сейчас</th></tr>
+<tr><td>Источник правды</td><td>данные + DOM, синхронизация вручную</td><td>state (ref / store / URL); DOM — производная</td></tr>
+<tr><td>Где живёт состояние</td><td>глобальные переменные</td><td>по радиусу: компонент → provide → store → URL</td></tr>
+<tr><td>Новые данные (WebSocket)</td><td>не забыть <code>render()</code></td><td><code>store.upsert()</code> — обновилось всё, что зависит</td></tr>
+<tr><td>Переиспользование UI</td><td>копипаста</td><td>13 компонентов с явным контрактом</td></tr>
+<tr><td>Переиспользование логики</td><td>—</td><td>6 composables</td></tr>
+<tr><td>Ошибки и загрузка</td><td>когда вспомнили</td><td>три состояния у каждого запроса, откат при ошибке</td></tr>
+<tr><td>Тесты</td><td>только e2e в браузере</td><td>7 unit-тестов за секунду; каждый слой отдельно</td></tr>
+<tr><td>Что стало хуже</td><td colspan="2">файлов много; чтобы понять, откуда данные на канбане, надо пройти view → store → api; реактивность «магична», пока не прочитан раздел 3; сборка и прокси — отдельная забота. Честная цена</td></tr>
+</table>
+<div class="why"><b>Зачем:</b> Как и в ООП-лабе: фреймворк не делает код «лучше» сам по себе — он перекладывает сложность из «синхронизировать DOM руками» в «правильно решить, где живёт состояние». Выигрыш есть, когда UI действительно меняется от многих источников (пользователь, сервер, сокет, URL) и его части переиспользуются. Для страницы с одной формой достаточно <code>&lt;form&gt;</code> и десяти строк JS — и это тоже надо уметь сказать.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Найдите в <code>components/</code> компонент, который импортирует store. Это нарушение правила «презентационные не знают store»? Оправдано?</li><li>Перечислите три состояния из приложения и для каждого объясните выбранный радиус (локальный / provide / store / URL). Есть ли такое, которое вы бы переместили?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 5</span><ul>
+<li>✅ <code>git commit -am "session 5: websocket, board, tests, build"</code></li>
+<li>📝 Ответы 5.1–5.4. Теперь раздел 12 письменно.</li>
+</ul></div>
+
+<h2 id="sec-10"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-10"></label>10. Чек-лист: концепция ↔ где она в коде <a class="anchor" href="#sec-10">#</a></h2>
+
+<table>
+<tr><th>Концепция</th><th>Где в коде</th><th>Одна фраза</th></tr>
+<tr><td>SFC, <code>&lt;script setup&gt;</code>, scoped CSS</td><td>любой <code>.vue</code></td><td>логика + разметка + стили одного компонента</td></tr>
+<tr><td><code>ref</code> / <code>reactive</code> / <code>.value</code></td><td>PlaygroundView 1.3; формы в LoginForm, TicketForm</td><td>реактивное состояние; примитив → ref, группа полей → reactive</td></tr>
+<tr><td><code>computed</code></td><td><code>visible</code> 1.4, <code>byId/byStatus</code> в store, <code>errors/valid</code> в TicketForm, writable в useRouteQuery</td><td>производное, кэшируемое, без побочных эффектов</td></tr>
+<tr><td><code>watch</code> / <code>immediate</code> / <code>deep</code></td><td><code>watch(filter.status)</code> → load; <code>watch(token)</code> → setToken; <code>watch(props.id)</code> в TicketDetailsView</td><td>побочный эффект на изменение</td></tr>
+<tr><td><code>nextTick</code>, batching</td><td>1.3 эксперимент 5</td><td>DOM обновляется асинхронно</td></tr>
+<tr><td>Директивы, <code>:class</code>, <code>v-for :key</code></td><td>1.4, TicketCard, KanbanColumn</td><td>ключ — идентичность DOM-узла</td></tr>
+<tr><td>props (validator, default) / emits</td><td>TicketCard, TicketList, KanbanColumn</td><td>контракт компонента; данные вниз, события вверх</td></tr>
+<tr><td><code>defineModel</code>, именованные модели</td><td>BaseInput, BaseSelect, FilterBar</td><td>компонент-редактор значения родителя</td></tr>
+<tr><td><code>$attrs</code>, <code>inheritAttrs</code></td><td>BaseInput</td><td>прозрачная обёртка</td></tr>
+<tr><td>Слоты: default, named, scoped, дефолтное содержимое</td><td>BaseModal, TicketList <code>#empty</code></td><td>разметка от родителя</td></tr>
+<tr><td><code>Teleport</code></td><td>BaseModal, ToastHost</td><td>рендер в другое место DOM</td></tr>
+<tr><td>Lifecycle: <code>onMounted/onUnmounted</code></td><td>BaseModal (keydown), useNow, useSocket</td><td>подписался — отпишись</td></tr>
+<tr><td>Template refs, <code>useTemplateRef</code>, <code>defineExpose</code></td><td>BaseModal (фокус), 1.3 (<code>pEl</code>)</td><td>доступ к DOM явно и редко</td></tr>
+<tr><td>Composables</td><td>useAsync useDebounce useNow useToast useRouteQuery useSocket</td><td>переносимая логика с реактивностью и lifecycle</td></tr>
+<tr><td><code>provide/inject</code></td><td>useToast (2.3, до переезда), TicketDetailsView → вкладки</td><td>контекст поддерева</td></tr>
+<tr><td>Pinia setup-store, <code>storeToRefs</code></td><td>stores/tickets, auth, ui</td><td>состояние на всё приложение; деструктуризация через storeToRefs</td></tr>
+<tr><td>Actions с оптимистикой и откатом</td><td><code>changeStatus</code></td><td>откат — обязанность store</td></tr>
+<tr><td>Pinia plugin, <code>$patch</code>, <code>$subscribe</code></td><td>plugins/persist.js</td><td>расширение всех store</td></tr>
+<tr><td>Store → store</td><td>tickets → ui</td><td>можно, без циклов</td></tr>
+<tr><td>Router: routes, lazy, named, redirect, 404</td><td>router/index.js</td><td>адрес как состояние</td></tr>
+<tr><td>Params → props, регулярка в пути</td><td><code>/tickets/:id(\d+)</code></td><td>страница не знает про useRoute</td></tr>
+<tr><td>Nested routes + <code>RouterView</code></td><td>TicketDetailsView + вкладки</td><td>родитель живёт, дети меняются</td></tr>
+<tr><td>Guards: <code>beforeEach</code>, <code>meta</code>, <code>onBeforeRouteLeave</code></td><td>installGuards, CommentsTab</td><td>правила доступа в одном месте</td></tr>
+<tr><td>Query как состояние, <code>replace</code>, <code>scrollBehavior</code></td><td>useRouteQuery</td><td>шарится ссылкой, переживает F5</td></tr>
+<tr><td>API-слой и ApiError</td><td>api/http.js, api/tickets.js</td><td>компоненты не знают URL</td></tr>
+<tr><td>Три состояния загрузки, гонка запросов</td><td>useAsync, <code>requestNo</code> в store</td><td>loading/error/data всегда; устаревшие ответы — в мусор</td></tr>
+<tr><td>WebSocket</td><td>useSocket + <code>store.upsert</code></td><td>новые данные входят через store</td></tr>
+<tr><td><code>TransitionGroup</code></td><td>KanbanColumn</td><td>анимация по key</td></tr>
+<tr><td><code>&lt;component :is&gt;</code>, <code>defineAsyncComponent</code></td><td>KanbanColumn, BoardView</td><td>полиморфизм в шаблоне; lazy не только страницы</td></tr>
+<tr><td>Vitest + Test Utils</td><td>__tests__/</td><td>mount/props/emits; fake timers; vi.mock; memory history</td></tr>
+<tr><td>Build, чанки, SPA за прокси</td><td>5.4</td><td>history mode требует fallback на index.html</td></tr>
+</table>
+
+<h2 id="sec-11"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-11"></label>11. Глоссарий <a class="anchor" href="#sec-11">#</a></h2>
+<div class="glossary-item" id="g-0"><b>Реактивность</b> — механизм, при котором чтение данных регистрирует зависимость, а запись — перезапускает зависимые вычисления и обновляет DOM.</div>
+<div class="glossary-item" id="g-1"><b>SFC (Single-File Component)</b> — файл <code>.vue</code> с секциями script, template, style.</div>
+<div class="glossary-item" id="g-2"><b><code>ref</code></b> — реактивная обёртка над значением с полем <code>.value</code>; в шаблоне разворачивается сама.</div>
+<div class="glossary-item" id="g-3"><b><code>reactive</code></b> — реактивный Proxy над объектом; без <code>.value</code>; деструктуризация теряет реактивность.</div>
+<div class="glossary-item" id="g-4"><b><code>computed</code></b> — кэшируемое производное значение; writable computed имеет и set.</div>
+<div class="glossary-item" id="g-5"><b><code>watch</code> / <code>watchEffect</code></b> — реакция на изменение источника / автоматически отслеживаемых зависимостей; для побочных эффектов.</div>
+<div class="glossary-item" id="g-6"><b><code>nextTick</code></b> — промис, который резолвится после ближайшего обновления DOM.</div>
+<div class="glossary-item" id="g-7"><b>Директива</b> — атрибут с префиксом <code>v-</code>, управляющий рендером: v-if, v-for, v-model, v-bind (:), v-on (@).</div>
+<div class="glossary-item" id="g-8"><b><code>key</code></b> — стабильный идентификатор элемента в <code>v-for</code>; по нему Vue сопоставляет DOM-узлы и анимирует перестановки.</div>
+<div class="glossary-item" id="g-9"><b>Props</b> — входные данные компонента, только для чтения; объявляются с типом, обязательностью, дефолтом, валидатором.</div>
+<div class="glossary-item" id="g-10"><b>Emits</b> — события, которые компонент посылает родителю; объявляются в <code>defineEmits</code>.</div>
+<div class="glossary-item" id="g-11"><b>One-way data flow</b> — данные вниз через props, изменения вверх через события; ребёнок не мутирует props.</div>
+<div class="glossary-item" id="g-12"><b><code>defineModel</code></b> — двусторонняя привязка на компоненте: prop + событие обновления в одном ref.</div>
+<div class="glossary-item" id="g-13"><b>Слот</b> — место в шаблоне компонента, куда родитель вставляет свою разметку; именованный, scoped (с данными от компонента), с дефолтом.</div>
+<div class="glossary-item" id="g-14"><b><code>$attrs</code></b> — атрибуты, переданные компоненту, но не объявленные как props; ложатся на корень или туда, куда привязаны через <code>v-bind="$attrs"</code>.</div>
+<div class="glossary-item" id="g-15"><b>Teleport</b> — встроенный компонент, рендерящий содержимое в другой узел DOM.</div>
+<div class="glossary-item" id="g-16"><b>Жизненный цикл</b> — setup → onMounted → обновления → onUnmounted; в composable хуки привязываются к вызвавшему компоненту.</div>
+<div class="glossary-item" id="g-17"><b>Template ref</b> — ссылка на DOM-элемент или дочерний компонент: <code>ref="x"</code> + <code>useTemplateRef('x')</code>.</div>
+<div class="glossary-item" id="g-18"><b>Composable</b> — функция <code>useXxx()</code>, инкапсулирующая реактивную логику и lifecycle; вызывается в setup.</div>
+<div class="glossary-item" id="g-19"><b><code>provide</code> / <code>inject</code></b> — передача значения всем потомкам поддерева без props.</div>
+<div class="glossary-item" id="g-20"><b>Презентационный компонент</b> — получает всё через props, ничего не знает об API и store.</div>
+<div class="glossary-item" id="g-21"><b>Контейнер (view)</b> — компонент страницы: знает store и роутер, загружает данные, раздаёт вниз.</div>
+<div class="glossary-item" id="g-22"><b>Store (Pinia)</b> — глобальный реактивный объект: state, getters (computed), actions; один экземпляр на приложение.</div>
+<div class="glossary-item" id="g-23"><b><code>storeToRefs</code></b> — деструктуризация store с сохранением реактивности state и getters.</div>
+<div class="glossary-item" id="g-24"><b>Оптимистичное обновление</b> — показать результат до ответа сервера, откатить при ошибке.</div>
+<div class="glossary-item" id="g-25"><b>Pinia plugin</b> — функция, расширяющая каждый store (<code>$patch</code>, <code>$subscribe</code>).</div>
+<div class="glossary-item" id="g-26"><b>Route / params / query / meta</b> — запись маршрута: путь → компонент; динамические сегменты; необязательные параметры; произвольные метаданные для guard'ов.</div>
+<div class="glossary-item" id="g-27"><b>Nested routes</b> — дочерние маршруты, рендерящиеся во вложенном <code>RouterView</code>.</div>
+<div class="glossary-item" id="g-28"><b>Navigation guard</b> — хук до/после навигации: разрешить, отменить, перенаправить.</div>
+<div class="glossary-item" id="g-29"><b>Lazy loading</b> — компонент маршрута как <code>() =&gt; import(...)</code> — отдельный чанк.</div>
+<div class="glossary-item" id="g-30"><b>History mode</b> — обычные URL без <code>#</code>; сервер должен отдавать index.html на любой путь.</div>
+<div class="glossary-item" id="g-31"><b>API-слой</b> — модули, знающие URL и формат ответов; единственное место с <code>fetch</code>.</div>
+<div class="glossary-item" id="g-32"><b><code>TransitionGroup</code></b> — анимация появления/исчезания/перемещения элементов списка по key.</div>
+<div class="glossary-item" id="g-33"><b>Динамический компонент</b> — <code>&lt;component :is="X"&gt;</code> — выбор компонента в рантайме.</div>
+<div class="glossary-item" id="g-34"><b><code>defineAsyncComponent</code></b> — компонент, загружаемый отдельным чанком при первом рендере.</div>
+<div class="glossary-item" id="g-35"><b>Vue Test Utils</b> — библиотека для монтирования компонентов в тестах: <code>mount</code>, <code>find</code>, <code>setValue</code>, <code>emitted</code>.</div>
+
+<h2 id="sec-12"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-12"></label>12. Вопросы на понимание (и для собеседования) <a class="anchor" href="#sec-12">#</a></h2>
+
+<p>Письменно, со ссылкой на шаг и файл.</p>
+<h3>Реактивность</h3>
+<ul>
+<li>Что такое <code>.value</code> и в каких трёх случаях его писать не нужно?</li>
+<li>Чем <code>computed</code> отличается от метода в шаблоне и от <code>watch</code> + <code>ref</code>? Когда что?</li>
+<li>Почему <code>const { q } = reactive({...})</code> ломает реактивность, а <code>storeToRefs(store)</code> — нет? Что делает <code>toRefs</code>?</li>
+<li>Что такое batching и когда нужен <code>nextTick</code>?</li>
+<li>Почему ключ по индексу в <code>v-for</code> — баг, а не стиль? Опишите эксперимент из 1.4.</li>
+</ul>
+<h3>Компоненты</h3>
+<ul>
+<li>Сформулируйте one-way data flow и объясните, что случится, если <code>TicketCard</code> запишет в <code>props.selected</code>.</li>
+<li>Props или слот: три примера из лабы с обоснованием.</li>
+<li>Что делает <code>defineModel</code> под капотом? Напишите эквивалент через props/emits.</li>
+<li>Зачем <code>Teleport</code> модалке? Что сломается без него?</li>
+<li>Почему подписки ставятся в <code>onMounted</code>, а не в теле setup? Что произойдёт без <code>onUnmounted</code> в BaseModal?</li>
+<li>Чем composable отличается от обычной функции-хелпера и от store?</li>
+</ul>
+<h3>Состояние</h3>
+<ul>
+<li>Правило «радиуса состояния» и по примеру на каждый уровень из лабы.</li>
+<li>Почему тосты сначала были <code>provide/inject</code>, а потом переехали в store? Что именно не получилось?</li>
+<li>Почему откат оптимистичного обновления — работа store, а тост об ошибке — работа компонента?</li>
+<li>Что и почему стоит persist'ить? Где живут фильтры списка и почему не в localStorage?</li>
+<li>Как store <code>tickets</code> защищён от гонки запросов? Почему <code>requestNo</code> — не <code>ref</code>?</li>
+</ul>
+<h3>Router</h3>
+<ul>
+<li>Params vs query: правило и примеры.</li>
+<li>Почему переход <code>/tickets/1 → /tickets/2</code> не вызывает <code>onMounted</code> второй раз? Как реагировать?</li>
+<li>Что означает возврат объекта из <code>beforeEach</code>? А <code>false</code>? А ничего?</li>
+<li>Почему <code>useAuthStore()</code> нельзя вызвать на верхнем уровне <code>router/index.js</code>?</li>
+<li>Зачем <code>router.replace</code>, а не <code>push</code>, в useRouteQuery и после логина?</li>
+</ul>
+<h3>Данные и тесты</h3>
+<ul>
+<li>Опишите путь одного клика «→» на канбане от кнопки до второй вкладки браузера (раздел 8, диаграмма).</li>
+<li>Почему WebSocket-обработчик вызывает <code>store.upsert</code>, а не меняет список в компоненте?</li>
+<li>Что подменяется в каждом из четырёх тестов 5.3 и почему этого достаточно?</li>
+<li>Что делает <code>try_files $uri /index.html</code> в nginx и что сломается без него?</li>
+</ul>
+<h3>Цена</h3>
+<ul>
+<li>Три вещи, которые стали сложнее по сравнению с DOM руками. Для какого приложения Vue не нужен?</li>
+</ul>
+
+<h2 id="sec-13"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-13"></label>13. Что дальше <a class="anchor" href="#sec-13">#</a></h2>
+
+<table>
+<tr><th>Тема</th><th>Что это</th><th>Связь с лабой</th><th>Почитать</th></tr>
+<tr><td>TypeScript во Vue</td><td><code>&lt;script setup lang="ts"&gt;</code>, типизированные props/emits/store</td><td>переведите <code>TicketCard</code> и <code>ticketsStore</code>; ошибки контрактов ловятся до запуска</td><td><a href="https://vuejs.org/guide/typescript/composition-api.html" target="_blank">vuejs.org/typescript</a></td></tr>
+<tr><td>VueUse</td><td>200+ готовых composables (useDebounceFn, useLocalStorage, useWebSocket, useIntersectionObserver…)</td><td>сравните свои useDebounce/useNow/useSocket с библиотечными</td><td><a href="https://vueuse.org/" target="_blank">vueuse.org</a></td></tr>
+<tr><td>TanStack Query (Vue Query)</td><td>кэш серверных данных: refetch, stale time, инвалидация, оптимистика</td><td>заменяет ручной <code>useAsync</code> + store-кэш; посмотрите, что из вашего кода исчезнет</td><td><a href="https://tanstack.com/query/latest/docs/framework/vue/overview" target="_blank">tanstack.com/query</a></td></tr>
+<tr><td>Формы: VeeValidate / Zod</td><td>декларативная валидация</td><td>вместо <code>computed errors</code> в TicketForm</td><td><a href="https://vee-validate.logaretm.com/v4/" target="_blank">vee-validate</a></td></tr>
+<tr><td>KeepAlive, Suspense</td><td>сохранение состояния страниц; async setup</td><td>«под капотом» 5.2</td><td><a href="https://vuejs.org/guide/built-ins/keep-alive.html" target="_blank">KeepAlive</a></td></tr>
+<tr><td>Drag-and-drop</td><td>vuedraggable / собственная реализация на HTML5 DnD</td><td>канбан: перетаскивание вместо кнопок ← →</td><td>—</td></tr>
+<tr><td>Nuxt</td><td>SSR / файловый роутинг / auto-imports на Vue</td><td>те же компоненты и store; роутинг из структуры папок</td><td><a href="https://nuxt.com/" target="_blank">nuxt.com</a></td></tr>
+<tr><td>E2E: Playwright</td><td>тесты в настоящем браузере поверх Docker-стенда</td><td>сценарий «логин → создать → сменить статус → увидеть во второй вкладке»</td><td><a href="https://playwright.dev/" target="_blank">playwright.dev</a></td></tr>
+<tr><td>Traefik Lab</td><td>ваш прокси</td><td>соберите <code>web</code> (nginx с dist/) + <code>api</code> за Traefik — 5.4 как production</td><td>Traefik_Lab_Plan.html</td></tr>
+<tr><td>Coffee Shop API (ООП-лаба)</td><td>ваш Laravel-бэкенд</td><td>второй фронтенд на тех же компонентах: меню, корзина, оплата — проверка переиспользуемости</td><td>OOP_Lab_CoffeeShop.html</td></tr>
+</table>
+
+</main>
+</div>
+<a class="totop" href="#top">↑ Наверх</a>
+<script>
+(function () {
+  var KEY = 'vue-lab-progress', NAVKEY = 'vue-lab-nav';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  var boxes = document.querySelectorAll('input.done');
+  function apply() {
+    var total = boxes.length, done = 0;
+    boxes.forEach(function (b) {
+      var k = b.dataset.key, on = !!state[k];
+      b.checked = on; if (on) done++;
+      var host = b.closest('.step') || b.closest('h2');
+      if (host) host.classList.toggle('is-done', on);
+      var nav = document.querySelector('.sidebar a[data-key="' + k + '"]');
+      if (nav) nav.classList.toggle('done', on);
+    });
+    document.getElementById('progress-fill').style.width = (total ? done / total * 100 : 0) + '%';
+    document.getElementById('progress-text').textContent = 'Пройдено: ' + done + ' / ' + total;
+  }
+  boxes.forEach(function (b) {
+    b.addEventListener('change', function () {
+      state[b.dataset.key] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      apply();
+    });
+  });
+  document.getElementById('reset-progress').addEventListener('click', function () {
+    if (confirm('Сбросить все отметки?')) { state = {}; localStorage.removeItem(KEY); apply(); }
+  });
+  apply();
+
+  var toggle = document.getElementById('nav-toggle');
+  function setNav(collapsed) {
+    document.body.classList.toggle('nav-collapsed', collapsed);
+    localStorage.setItem(NAVKEY, collapsed ? '1' : '0');
+    toggle.textContent = collapsed ? '☰' : '✕';
+    toggle.title = collapsed ? 'Показать оглавление' : 'Скрыть оглавление';
+  }
+  toggle.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-collapsed')); });
+  setNav(localStorage.getItem(NAVKEY) === '1' || window.innerWidth < 900);
+
+  // клик по чекбоксу в заголовке не должен вести по якорю
+  document.querySelectorAll('.done-label').forEach(function (l) { l.addEventListener('click', function (e) { e.stopPropagation(); }); });
+})();
+</script>
+</body>
+</html>
