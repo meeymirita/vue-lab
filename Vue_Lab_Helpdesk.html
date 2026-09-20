@@ -545,6 +545,7 @@ WebSocket (socket.io-client) → composable useSocket → store.upsert(ticket)  
 </table>
 <div class="session-banner" id="session-1">Сессия <a href="#session-1" style="color:#fff;text-decoration:none">1</a> — Стенд, бэкенд, песочница реактивности, первый запрос <span>~3 часа</span></div>
 <div class="step" id="step-1-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-1"></label><span class="num">Шаг 1.1</span>Стенд: docker-compose, скаффолды Nest и create-vue<a class="anchor" href="#step-1-1">#</a></span><div class="step-body">
+<div class="note-box"><span class="tag">УЖЕ В РЕПО</span> Этот репозиторий (<code>vue-lab</code>) уже <code>git init</code> — отдельный не нужен, пропустите эту часть команды. Папки <code>server/</code> и <code>web/</code> уже созданы пустыми (заглушки <code>.gitkeep</code>) — можно скаффолдить прямо в них командами ниже (Nest/Vite сами не против непустой, но пустой от файлов папки) или удалить и создать заново, если хочется чистого места.</div>
 <pre><code>mkdir vue-helpdesk-lab &amp;&amp; cd vue-helpdesk-lab &amp;&amp; git init
 # скаффолды через контейнер node:22 (или локально, если Node 22 установлен)
 docker run --rm -it -v "$PWD":/app -w /app node:22 npx @nestjs/cli@latest new server --skip-git --package-manager npm
