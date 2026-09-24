@@ -2001,6 +2001,8 @@ async function create(dto) {
 &lt;/template&gt;</code></pre>
 <pre><code>&lt;!-- TicketCard.vue — карточка ведёт на страницу: emit('select') заменяем ссылкой --&gt;
 &lt;RouterLink :to="{ name: 'ticket', params: { id: ticket.id } }" class="title"&gt;{{ ticket.title }}&lt;/RouterLink&gt;
+&lt;!-- и убираем старый механизм выбора целиком: @click="emit('select', ticket.id)" с &lt;article&gt;,
+     'select' из defineEmits, а в TicketList.vue — проброс @select="emit('select', $event)" и 'select' из его emits --&gt;
 &lt;!-- в TicketsListView модалку с описанием можно удалить: у тикета теперь своя страница --&gt;</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Клик по названию → <code>/tickets/1</code>, вкладки переключают <code>/tickets/1/comments</code>, <code>/tickets/1/history</code> без перезагрузки родителя (тикет не перезапрашивается — проверьте в Network). Из тикета 1 по ссылке в тикет 2 (например, из «Список» → другая карточка) — <code>watch(props.id)</code> подгружает новый. Комментарий отправляется только залогиненным; начатый и не отправленный — <code>confirm</code> при уходе. Новый тикет → редирект на его страницу; <code>/tickets/999</code> → «Тикет не найден».</p></div>
 <div class="why"><b>Зачем:</b> <b>Вложенные маршруты</b> — родитель живёт, пока меняются дети: тикет загружен один раз, вкладки — лёгкие. <b><code>watch(() =&gt; props.id)</code></b> — самая частая ошибка с роутером: переход между двумя маршрутами одного компонента <i>не пересоздаёт</i> компонент, <code>onMounted</code> не сработает второй раз. <b><code>provide('ticket', computed)</code></b> — вкладки получают реактивный тикет из store: когда в сессии 5 придёт WebSocket-обновление, вкладка «Описание» обновится сама. <b>Комментарии — не в store</b>: их читает одна страница, радиус — компонент. <b><code>TicketForm</code> — презентационная</b>: валидация внутри, отправка — <code>emit</code>; та же форма подойдёт для редактирования.</div>
@@ -2233,7 +2235,6 @@ describe('TicketCard', () =&gt; {
     const w = mount(TicketCard, { props: { ticket }, global: { stubs: ['RouterLink'] } })
     await w.find('select').setValue('resolved')
     expect(w.emitted('status-change')).toEqual([[7, 'resolved']])
-    expect(w.emitted('select')).toBeUndefined()            // смена статуса не эмитит select
   })
 })</code></pre>
 <pre><code>// web/src/__tests__/useDebounce.spec.js — composable с таймерами
