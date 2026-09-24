@@ -172,7 +172,7 @@
 <p class="subtitle">Vue 3 с нуля на приложении службы поддержки: тикеты, канбан, комментарии, живые обновления. Реактивность → компоненты → Vue Router → Pinia → WebSocket и тесты. Стек: Vue 3.5 + Vite + Vue Router 4 + Pinia + Vitest, бэкенд — NestJS.</p>
 
 <div class="toc"><b>Как устроена лаба.</b> Разделы 1–8 — теория: от «зачем фреймворк» до реактивности под капотом, компонентной архитектуры, роутера и стора — каждое понятие на примере helpdesk. Раздел 9 — пять сессий заданий: стенд и азбука реактивности, компоненты, Router, Pinia, продвинутое (WebSocket, transitions, тесты). У каждого шага: код → «зачем» → команда → ожидаемый результат → «проверь себя». Разделы 10–13 — чек-лист, глоссарий, вопросы, что дальше. Галочки прогресса сохраняются в браузере.
-<p class="small">Отдельный репозиторий. Фронтенд — JavaScript (не TypeScript), Composition API + <code>&lt;script setup&gt;</code>; Options API показан в теории для сравнения. Бэкенд — маленький NestJS-сервис (TypeScript, как принято в Nest), полностью дан в сессии 1: его нужно скопировать и запустить, писать — не нужно. Всё в Docker, как в остальных лабах.</p></div>
+<p class="small">Отдельный репозиторий. Фронтенд — JavaScript (не TypeScript), Composition API + <code>&lt;script setup&gt;</code>; Options API показан в теории для сравнения. Бэкенд — маленький NestJS-сервис (TypeScript, как принято в Nest), полностью дан в сессии 1: его нужно скопировать и запустить, писать — не нужно. Это не NestJS Lab: бэкенд дан только чтобы было к чему ходить. Всё в Docker, как в остальных лабах.</p></div>
 
 <h2 id="sec-1"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-1"></label>1. Зачем фреймворк: DOM руками vs декларативно <a class="anchor" href="#sec-1">#</a></h2>
 
@@ -370,7 +370,7 @@ state.status = 'closed'      ──пишет───▶  set-ловушка: �
 <tr><td>Изменил переменную — шаблон не обновился</td><td>переменная не реактивна: обычный <code>let</code>, или деструктурировали <code>reactive</code>, или потеряли <code>.value</code></td><td><code>ref()</code>; <code>toRefs(state)</code> при деструктуризации; <code>.value</code> в скрипте</td></tr>
 <tr><td>Прочитал DOM сразу после изменения — старое значение</td><td>обновление DOM асинхронное (batching)</td><td><code>await nextTick()</code></td></tr>
 <tr><td>Массив меняю по индексу / <code>length</code> — обновляется (в Vue 3 да)</td><td>Proxy ловит всё, в отличие от Vue 2</td><td>ничего; но <code>arr = arr.filter(...)</code> для ref-массива — присвоить в <code>.value</code></td></tr>
-<tr><td><code>watch(obj, cb)</code> не срабатывает на <code>obj.field = x</code></td><td>для ref-объекта watch по умолчанию не глубокий</td><td><code>{ deep: true }</code> или <code>watch(() =&gt; obj.value.field, cb)</code></td></tr>
+<tr><td><code>watch(obj, cb)</code> не срабатывает на <code>obj.value.field = x</code></td><td>для ref-объекта watch по умолчанию не глубокий</td><td><code>{ deep: true }</code> или <code>watch(() =&gt; obj.value.field, cb)</code></td></tr>
 <tr><td>Огромный список из API тормозит</td><td>Vue сделал реактивным каждый объект глубоко</td><td><code>shallowRef</code> / <code>markRaw</code> для данных, которые не меняются</td></tr>
 <tr><td><code>computed</code> «не пересчитался»</td><td>внутри прочитано нереактивное (например, <code>Date.now()</code>, <code>localStorage</code>)</td><td>сделать источник реактивным или использовать <code>watch</code></td></tr>
 </table>
@@ -432,7 +432,7 @@ defineExpose({ focus })
 </table>
 <details class="deep"><summary>🔬 Под капотом: почему фильтры — в query, а не в ref</summary><div class="deep-body">
 
-<p>Если фильтры списка живут в локальном <code>ref</code>, они пропадают при F5, их нельзя отправить коллеге ссылкой, а кнопка «назад» из тикета возвращает в неотфильтрованный список. Хранить их в <code>route.query</code> решает все три проблемы — но требует двусторонней синхронизации: query → состояние формы при загрузке, состояние → query при изменении (<code>router.replace</code>, чтобы не засорять историю). Это делает composable <code>useRouteQuery</code> в сессии 3 — типичный пример «логика, которую хочется вынести».</p>
+<p>Если фильтры списка живут в локальном <code>ref</code>, они пропадают при F5, их нельзя отправить коллеге ссылкой, а кнопка «назад» из тикета возвращает в неотфильтрованный список. Хранить их в <code>route.query</code> решает все три проблемы — но требует двусторонней синхронизации: query → состояние формы при загрузке, состояние → query при изменении (<code>router.replace</code>, чтобы не засорять историю). Это делает composable <code>useRouteQuery</code> в сессии 4 — типичный пример «логика, которую хочется вынести».</p>
 </div></details>
 
 <h2 id="sec-6"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-6"></label>6. Pinia — общее состояние <a class="anchor" href="#sec-6">#</a></h2>
@@ -442,7 +442,7 @@ export const useTicketsStore = defineStore('tickets', () =&gt; {
   const byId  = computed(() =&gt; Object.fromEntries(items.value.map(t =&gt; [t.id, t])))   // getter
   const open  = computed(() =&gt; items.value.filter(t =&gt; t.status === 'open'))
 
-  async function load(params) { items.value = await api.tickets.list(params) }        // actions
+  async function load(params) { items.value = (await api.tickets.list(params)).items } // actions
   function upsert(ticket) {
     const i = items.value.findIndex(t =&gt; t.id === ticket.id)
     i === -1 ? items.value.push(ticket) : items.value.splice(i, 1, ticket)
@@ -480,14 +480,14 @@ fetch                                  браузер
 
 WebSocket (socket.io-client) → composable useSocket → store.upsert(ticket)   (сессия 5)</pre>
 
-<p>Три состояния любой загрузки — <code>loading</code>, <code>error</code>, <code>data</code> — должны быть отражены в UI всегда, не только «когда вспомнили». Composable <code>useAsync</code> (2.10) делает это правило дешёвым. Оптимистичное обновление (сессия 4): показать изменение сразу, откатить при ошибке — это работа store, потому что откат должен быть согласован для всех, кто читает данные.</p>
+<p>Три состояния любой загрузки — <code>loading</code>, <code>error</code>, <code>data</code> — должны быть отражены в UI всегда, не только «когда вспомнили». Composable <code>useAsync</code> (2.10) делает это правило дешёвым. Оптимистичное обновление (сессия 3): показать изменение сразу, откатить при ошибке — это работа store, потому что откат должен быть согласован для всех, кто читает данные.</p>
 
 <h2 id="sec-8"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-8"></label>8. Стек, структура проекта, поток данных <a class="anchor" href="#sec-8">#</a></h2>
 
 <table>
 <tr><th>Компонент</th><th>Выбор</th><th>Зачем</th></tr>
-<tr><td>Фронтенд</td><td>Vue 3.5, Vite 6, JavaScript</td><td>Composition API, <code>&lt;script setup&gt;</code>, <code>defineModel</code>, <code>useTemplateRef</code></td></tr>
-<tr><td>Роутинг / состояние</td><td>Vue Router 4, Pinia 2</td><td>официальный стек</td></tr>
+<tr><td>Фронтенд</td><td>Vue 3.5, Vite 6+, JavaScript</td><td>Composition API, <code>&lt;script setup&gt;</code>, <code>defineModel</code>, <code>useTemplateRef</code></td></tr>
+<tr><td>Роутинг / состояние</td><td>Vue Router 4, Pinia 2+</td><td>официальный стек</td></tr>
 <tr><td>Тесты</td><td>Vitest + @vue/test-utils + jsdom</td><td>ставится скаффолдом <code>create-vue</code></td></tr>
 <tr><td>Realtime</td><td>socket.io-client</td><td>Nest gateway на той же библиотеке</td></tr>
 <tr><td>Бэкенд</td><td>NestJS 11, in-memory данные</td><td>знакомый; дан целиком, не пишется</td></tr>
@@ -499,12 +499,12 @@ WebSocket (socket.io-client) → composable useSocket → store.upsert(ticket)  
 └── web/                           Vue (create-vue: router, pinia, vitest)
     ├── vite.config.js             proxy /api → api:3000, /socket.io → ws
     └── src/
-        ├── main.js                createApp → use(router) → use(pinia) → mount
+        ├── main.js                createApp → use(pinia) → use(router) → mount
         ├── App.vue                AppHeader + &lt;RouterView&gt; + ToastHost
         ├── api/                   http.js (fetch-обёртка, ApiError), auth.js, tickets.js
         ├── composables/           useAsync, useDebounce, useRouteQuery, useSocket
         ├── components/
-        │   ├── ui/                BaseButton, BaseInput (defineModel), BaseModal (Teleport+slots), StatusBadge
+        │   ├── ui/                BaseSelect, BaseInput (defineModel), BaseModal (Teleport+slots), StatusBadge
         │   ├── ticket/            TicketCard, TicketList, TicketForm, FilterBar
         │   └── layout/            AppHeader, ToastHost
         ├── router/index.js        routes, lazy import, guards
@@ -547,7 +547,7 @@ WebSocket (socket.io-client) → composable useSocket → store.upsert(ticket)  
 <div class="step" id="step-1-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-1"></label><span class="num">Шаг 1.1</span>Стенд: docker-compose, скаффолды Nest и create-vue<a class="anchor" href="#step-1-1">#</a></span><div class="step-body">
 <div class="note-box"><span class="tag">УЖЕ В РЕПО</span> Этот репозиторий (<code>vue-lab</code>) уже <code>git init</code> — отдельный не нужен, пропустите эту часть команды. Папки <code>server/</code> и <code>web/</code> уже созданы пустыми (заглушки <code>.gitkeep</code>) — можно скаффолдить прямо в них командами ниже (Nest/Vite сами не против непустой, но пустой от файлов папки) или удалить и создать заново, если хочется чистого места.</div>
 <pre><code>mkdir vue-helpdesk-lab &amp;&amp; cd vue-helpdesk-lab &amp;&amp; git init
-# скаффолды через контейнер node:22 (или локально, если Node 22 установлен)
+# скаффолды через контейнер node:22 (или локально, если Node 22+ установлен — 24 LTS тоже подходит)
 docker run --rm -it -v "$PWD":/app -w /app node:22 npx @nestjs/cli@latest new server --skip-git --package-manager npm
 docker run --rm -it -v "$PWD":/app -w /app node:22 npm create vue@latest web -- --router --pinia --vitest</code></pre>
 <pre><code># docker-compose.yml
@@ -843,7 +843,7 @@ curl -s -X POST localhost:3000/api/auth/login -H 'Content-Type: application/json
 curl -s -X PATCH localhost:3000/api/tickets/1 -H 'Content-Type: application/json' -d '{"status":"in_progress"}'    # 401 без токена</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>5
 { "token": "t-1-…", "user": { "id": 1, "email": "anna@helpdesk.test", "name": "Анна", "role": "agent" } }
-{"message":"Требуется вход","error":"Unauthorized","statusCode":401}</pre><p>Чтение открыто, изменения — по токену. <code>localhost:5173</code> показывает пустую страницу без ошибок в консоли.</p></div>
+{"message":"Требуется вход","error":"Unauthorized","statusCode":401}</pre><p>Чтение открыто, изменения — по токену. <code>localhost:5173</code> показывает ошибку Vite «Failed to resolve import "./views/PlaygroundView.vue"» — этот файл появится только в шаге 1.3, пока это ожидаемо.</p></div>
 <div class="why"><b>Зачем:</b> Бэкенд — не предмет лабы, но он должен быть <i>настоящим</i>: задержка, 401/404, история изменений, WebSocket-событие при каждом изменении. Без этого не на чем показать loading-состояния, обработку ошибок, guard'ы роутера и живые обновления. API нарочно маленький: 8 эндпоинтов, вы их выучите за час.</div>
 </div></div>
 <div class="step" id="step-1-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-3"></label><span class="num">Шаг 1.3</span>Песочница реактивности: ref, reactive, computed, watch, nextTick — <span class="file">views/PlaygroundView.vue</span><a class="anchor" href="#step-1-3">#</a></span><div class="step-body">
@@ -910,7 +910,7 @@ const { priority } = form                      // ❌ это просто стр
 section { margin: 16px 0; padding: 12px; background: #fff; border-radius: 6px; }
 .ok { color: #2f8f6b; } .bad { color: #c62828; }
 &lt;/style&gt;</code></pre>
-<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><ul><li>Кнопка «plain++ и count++»: <code>count</code> и <code>double</code> растут, <code>plain</code> в шаблоне остаётся 0 — хотя в памяти растёт. Шаблон перерисовывается только из-за <code>count</code>, а при перерисовке читает и <code>plain</code>… откройте Devtools и проверьте, что вы увидите: <code>plain</code> обновится <i>заодно</i>, но никогда — сам по себе.</li><li>В консоли «computed double пересчитан» — ровно раз на клик, не на каждое чтение <code>double</code> в шаблоне.</li><li>Смена priority → строка в логе. Ввод в title → в консоли «form изменилась (deep)», но лог не растёт.</li><li>«count++ и прочитать DOM»: <code>сразу: count = 3</code>, <code>после nextTick: count = 4</code>.</li><li>Деструктурированный <code>priority</code> навсегда «medium».</li></ul></div>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><ul><li>Кнопка «plain++ и count++»: <code>count</code> и <code>double</code> растут; <code>plain</code> в памяти растёт тоже, но в шаблоне сам по себе не обновится никогда — только «заодно», когда перерисовку вызовет изменение <code>count</code> (шаблон при этом перерисовывается целиком и читает актуальный <code>plain</code>). Откройте Devtools и проверьте это на практике.</li><li>В консоли «computed double пересчитан» — ровно раз на клик, не на каждое чтение <code>double</code> в шаблоне.</li><li>Смена priority → строка в логе. Ввод в title → в консоли «form изменилась (deep)», но лог не растёт.</li><li>«count++ и прочитать DOM»: <code>сразу: count = 3</code>, <code>после nextTick: count = 4</code>.</li><li>Деструктурированный <code>priority</code> навсегда «medium».</li></ul></div>
 <div class="why"><b>Зачем:</b> Это все шесть правил реактивности из раздела 3 — глазами. Особенно важен первый эксперимент: <code>plain</code> обновился «заодно» — это классическая ловушка, из-за которой нереактивная переменная <i>иногда</i> работает и обманывает. Правило: всё, что читает шаблон, — <code>ref</code>/<code>reactive</code>/<code>computed</code>, без исключений.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>watch(form, …, { deep: true })</code> срабатывает на ввод в title, а <code>watch(() =&gt; form.priority, …)</code> — нет? Что произойдёт, если убрать <code>deep: true</code> у первого? (Подсказка: для <code>reactive</code>-объекта watch глубокий по умолчанию — проверьте.)</li><li>Замените <code>computed double</code> на функцию <code>function double() { return count.value * 2 }</code> и вызывайте <code>{{ double() }}</code> в шаблоне. Что изменится в консоли и почему?</li></ul></div>
 </div></div>
@@ -1635,13 +1635,13 @@ async function onStatusChange(id, status) {
 }
 &lt;/script&gt;</code></pre>
 <pre><code># сценарии:
-# 1) не залогинены → выбрать статус в карточке: бейдж меняется мгновенно и через 300 мс возвращается, тост «Войдите…»
+# 1) не залогинены → выбрать статус в карточке: бейдж меняется мгновенно и откатывается почти сразу (guard бросает 401 ещё до искусственной задержки), тост «Войдите…»
 # 2) войти как anna (agent) → open → in_progress: бейдж меняется, тост success, в Network PATCH 200
 # 3) anna → closed: откат + тост «Закрывать тикеты может только admin»
 # 4) войти как boris (admin) → closed: успех</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><p>Все четыре сценария. В Devtools → Pinia → timeline видно два <code>upsert</code> на успешную смену (оптимистичный и серверный) и два на неудачную (оптимистичный и откат).</p></div>
 <div class="why"><b>Зачем:</b> <b>Оптимистичное обновление — обязанность store</b>, а не компонента: откат должен быть виден всем, кто читает <code>items</code> (список, канбан, деталь), и только store знает, как выглядела «предыдущая версия». Компонент решает только, что <i>сказать</i> пользователю. Заметьте разделение: store бросает исключение (данные), контейнер переводит его в тост (UI). Это та же граница, что и в ООП-лабе: доменная ошибка ↔ HTTP-ответ.</div>
-<details class="deep"><summary>🔬 Под капотом: 4 вместо 403 — намеренная неаккуратность бэкенда</summary><div class="deep-body">
+<details class="deep"><summary>🔬 Под капотом: 404 вместо 403 — намеренная неаккуратность бэкенда</summary><div class="deep-body">
 
 <p>Nest возвращает <code>NotFoundException</code> на «только admin может закрывать» — так написано в сервисе нарочно. Правильный код — 403. Исправьте на бэкенде (<code>ForbiddenException</code>) и убедитесь, что фронтенду всё равно: он показывает <code>e.message</code>. Но если бы фронт различал 403 («нет прав») и 404 («тикета нет») — например, для редиректа, — плохой код ответа сломал бы логику. Мораль: коды ответа — часть контракта API, и фронтенд на них опирается.</p>
 </div></details>
@@ -1799,7 +1799,7 @@ mkdir -p web/src/views/ticket &amp;&amp; for f in DetailsTab CommentsTab History
 <div class="why"><b>Зачем:</b> <b>Маршрут — это состояние</b>: какая страница, с каким id, с какими фильтрами (4.4). <b>Lazy import</b> — каждая страница в своём чанке, стартовый бандл не растёт с числом страниц; стартовую страницу оставляем статической, чтобы не было двойной загрузки. <b><code>props: route =&gt; ({...})</code></b> — страница получает <code>id</code> как обычный prop, числом, и не знает про <code>useRoute()</code>: её можно смонтировать в тесте с <code>props: { id: 1 }</code>. <b>Именованные маршруты</b> в <code>RouterLink</code> и <code>router.push</code> — переименование пути не ломает ссылки.</div>
 <details class="deep"><summary>🔬 Под капотом: RouterLink активные классы, replace vs push</summary><div class="deep-body">
 
-<p><code>router-link-active</code> — путь «включает» ссылку (<code>/tickets</code> активна на <code>/tickets/5</code>), <code>router-link-exact-active</code> — точное совпадение. <code>router.push</code> добавляет запись в историю (кнопка «назад» вернёт), <code>router.replace</code> заменяет текущую — для редиректа после логина (не нужно возвращаться на форму входа) и для синхронизации фильтров (4.4).</p>
+<p><code>router-link-active</code> — путь «включает» ссылку, если маршрут ссылки — предок текущего в дереве маршрутов (у нас <code>/tickets</code> и <code>/tickets/:id(\d+)</code> объявлены как два самостоятельных top-level маршрута, а не родитель/потомок, так что на странице тикета ссылка «Список» этот класс не получит), <code>router-link-exact-active</code> — точное совпадение. <code>router.push</code> добавляет запись в историю (кнопка «назад» вернёт), <code>router.replace</code> заменяет текущую — для редиректа после логина (не нужно возвращаться на форму входа) и для синхронизации фильтров (4.4).</p>
 </div></details>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>/tickets/new</code> объявлен <i>до</i> <code>/tickets/:id</code> и почему регулярка <code>(\d+)</code> всё равно нужна?</li><li>Что вернёт <code>useRoute().params.id</code> — строку или число? Зачем тогда <code>props: route =&gt; …</code>?</li></ul></div>
 </div></div>
@@ -2233,7 +2233,7 @@ describe('TicketCard', () =&gt; {
     const w = mount(TicketCard, { props: { ticket }, global: { stubs: ['RouterLink'] } })
     await w.find('select').setValue('resolved')
     expect(w.emitted('status-change')).toEqual([[7, 'resolved']])
-    expect(w.emitted('select')).toBeUndefined()            // .stop на select сработал
+    expect(w.emitted('select')).toBeUndefined()            // смена статуса не эмитит select
   })
 })</code></pre>
 <pre><code>// web/src/__tests__/useDebounce.spec.js — composable с таймерами
