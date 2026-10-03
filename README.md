@@ -13,7 +13,7 @@ Helpdesk (система тикетов) на Vue 3 с нуля — реакти
 
 ## Стек
 
-Vue 3.5 + Vite 8 + Vue Router 4 + Pinia 2+ + Vitest, бэкенд — готовый мини-бэкенд (Node). Composition API + `<script setup>` (Options API — только в теории для сравнения). Всё в Docker.
+Vue 3.5 + Vite 7 + Vue Router 4 + Pinia 2+ + Vitest, бэкенд — готовый мини-бэкенд (Node). Composition API + `<script setup>` (Options API — только в теории для сравнения). Всё в Docker.
 
 ## Формат
 
