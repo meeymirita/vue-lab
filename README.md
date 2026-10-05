@@ -17,7 +17,7 @@ Vue 3.5 + Vite 7 + Vue Router 4 + Pinia 2+ + Vitest, бэкенд — готов
 
 ## Формат
 
-Методичка [`vue.html`](vue.html) — открывается в браузере.
+Методичка [`vue.html`](vue.html) ([открыть на сайте](https://anitech.meeymirita.ru/works/vue.html)) — открывается в браузере.
 
 ## Что внутри (5 сессий, порядок строгий — Pinia раньше Router, потому что guard'ам роутера нужен auth-store)
 
@@ -28,6 +28,10 @@ Vue 3.5 + Vite 7 + Vue Router 4 + Pinia 2+ + Vitest, бэкенд — готов
 - **Сессия 5** — WebSocket (`useSocket`) с живыми обновлениями через store; канбан-доска (`TransitionGroup`, `defineAsyncComponent`, динамический компонент); тесты на Vitest (компонент, composable, store, router guard); production-сборка и деплой за прокси
 
 Главная мысль лабы: Vue — это реактивность + компоненты + экосистема (Router — состояние адресной строки, Pinia — общее состояние), и каждое задание про то, где живёт состояние и кто его меняет.
+
+## Лицензия и авторство
+
+Код — MIT, тексты — CC BY 4.0, обложки и иллюстрации не покрыты (см. [LICENSE](LICENSE)). Кто что сделал: [NOTICE](NOTICE).
 
 ---
 
