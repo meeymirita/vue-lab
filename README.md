@@ -1,6 +1,6 @@
 # Vue Lab — Helpdesk
 
-![Vue.js](https://meeymirita-files.storage.yandexcloud.net/vue/vue-anime.png)
+![Vue.js](https://raw.githubusercontent.com/meeymirita/works-lab/main/images/vue.png)
 
 > **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/frontend/vue.md](https://github.com/meeymirita/lab-fixes/blob/main/frontend/vue.md) репозитория `lab-fixes`.
 
