@@ -17,7 +17,7 @@ Vue 3.5 + Vite 7 + Vue Router 4 + Pinia 2+ + Vitest, бэкенд — готов
 
 ## Формат
 
-Методичка [`Vue_Lab_Helpdesk.html`](Vue_Lab_Helpdesk.html) — открывается в браузере.
+Методичка [`vue.html`](vue.html) — открывается в браузере.
 
 ## Что внутри (5 сессий, порядок строгий — Pinia раньше Router, потому что guard'ам роутера нужен auth-store)
 
